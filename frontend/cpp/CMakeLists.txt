@@ -26,8 +26,6 @@ set(USE_TLS ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(ixwebsocket)
 
 
-
-
 if (MINGW)
     set(CMAKE_EXE_LINKER_FLAGS
             "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")
@@ -36,7 +34,9 @@ endif ()
 
 add_executable(Harmony
         src/main.cpp
-#        src/poc.cpp
+        src/voiceChannels/VoiceChannelManager.cpp
+        src/voiceChannels/VoiceChannelManager.h
+        src/settings.h
 )
 
 #include directories
