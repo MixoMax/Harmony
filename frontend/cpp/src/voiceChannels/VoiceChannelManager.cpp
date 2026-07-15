@@ -144,10 +144,12 @@ void VoiceChannelManager::connect(std::string roomName, std::string userName, st
                                   std::string speakerDeviceName) {
     auto &instance = getInstance();
 
+    instance.mutex.lock();
     instance.roomName = std::move(roomName);
     instance.userName = std::move(userName);
     instance.micDeviceName = std::move(micDeviceName);
     instance.speakerDeviceName = std::move(speakerDeviceName);
+    instance.mutex.unlock();
     instance.shouldConnect = true;
     instance.shouldConnect.notify_all();
 }

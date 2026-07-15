@@ -21,9 +21,9 @@ class VoiceChannelManager {
 
     VoiceChannelManager();
 
-public:
     static VoiceChannelManager &getInstance();
 
+public:
     static void connect(std::string roomName, std::string userName, std::string micDeviceName,
                         std::string speakerDeviceName);
 
