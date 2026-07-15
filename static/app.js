@@ -36,7 +36,9 @@ btnJoin.addEventListener('click', () => {
         return;
     }
 
-    const wsUrl = `ws://${window.location.host}/ws/${encodeURIComponent(room)}/${encodeURIComponent(username)}`;
+    const protocol_prefix = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+    const wsUrl = `${protocol_prefix}://${window.location.host}/ws/${encodeURIComponent(room)}/${encodeURIComponent(username)}`;
     ws = new WebSocket(wsUrl);
     ws.binaryType = "arraybuffer"; // Important: Handle raw bytes directly
 
