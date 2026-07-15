@@ -39,3 +39,4 @@ __pycache__/
 .vscode/
 .idea/
 *.iml
+/frontend/cpp/_deps
