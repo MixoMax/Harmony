@@ -16,13 +16,16 @@ class VoiceChannelManager {
     std::mutex mutex;
     std::string roomName;
     std::string userName;
+    std::string micDeviceName;
+    std::string speakerDeviceName;
 
     VoiceChannelManager();
 
 public:
     static VoiceChannelManager &getInstance();
 
-    static void connect(std::string roomName, std::string userName);
+    static void connect(std::string roomName, std::string userName, std::string micDeviceName,
+                        std::string speakerDeviceName);
 
     static void disconnect();
 

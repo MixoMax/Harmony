@@ -37,6 +37,7 @@ add_executable(Harmony
         src/voiceChannels/VoiceChannelManager.cpp
         src/voiceChannels/VoiceChannelManager.h
         src/settings.h
+        src/voiceChannels/PulseAudioDeviceEnumeration.h
 )
 
 #include directories

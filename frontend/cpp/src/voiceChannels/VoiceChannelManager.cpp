@@ -37,7 +37,7 @@ VoiceChannelManager::VoiceChannelManager() {
                 break;
             }
             std::cout << "> Starting Websocket" << std::endl;
-
+            mutex.lock();
 
             int paCaptureErrorCode;
             pa_simple *captureStream = pa_simple_new(
@@ -90,6 +90,7 @@ VoiceChannelManager::VoiceChannelManager() {
                     }
                 });
             webSocket.enableAutomaticReconnection();
+            mutex.unlock();
             webSocket.start();
 
             bool wasConnected{false};
@@ -139,11 +140,14 @@ VoiceChannelManager &VoiceChannelManager::getInstance() {
     return instance;
 }
 
-void VoiceChannelManager::connect(std::string roomName, std::string userName) {
+void VoiceChannelManager::connect(std::string roomName, std::string userName, std::string micDeviceName,
+                                  std::string speakerDeviceName) {
     auto &instance = getInstance();
 
     instance.roomName = std::move(roomName);
     instance.userName = std::move(userName);
+    instance.micDeviceName = std::move(micDeviceName);
+    instance.speakerDeviceName = std::move(speakerDeviceName);
     instance.shouldConnect = true;
     instance.shouldConnect.notify_all();
 }
