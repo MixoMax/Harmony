@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmony</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <p>Websocket Audio Streaming Proof of Concept</p>
+        </header>
+
+        <div id="join-screen" class="screen active">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="room">Room ID</label>
+                <input type="text" id="room" placeholder="Enter room ID (e.g. general)" autocomplete="off">
+            </div>
+            <button id="btn-join">Join Room</button>
+        </div>
+
+        <div id="room-screen" class="screen">
+            <div class="room-header">
+                <h2>Room: <span id="current-room"></span></h2>
+                <button id="btn-leave" class="danger">Disconnect</button>
+            </div>
+            
+            <div class="controls">
+                <button id="btn-mic" class="success">Start Microphone</button>
+            </div>
+
+            <div class="log-container">
+                <h3>Connection Log</h3>
+                <div id="log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
