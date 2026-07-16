@@ -34,10 +34,13 @@ endif ()
 
 add_executable(Harmony
         src/main.cpp
+        src/glad.c
         src/voiceChannels/VoiceChannelManager.cpp
         src/voiceChannels/VoiceChannelManager.h
         src/settings.h
         src/voiceChannels/PulseAudioDeviceEnumeration.h
+        src/graphics/GraphicsManager.cpp
+        src/graphics/GraphicsManager.h
 )
 
 #include directories

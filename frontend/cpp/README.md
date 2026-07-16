@@ -1,4 +1,4 @@
-
 # How to Start
-- on Linux just run ./Harmony --name "EnterName" --room "EnterRoomName"
+
+- on Linux just run ./Harmony
 - on Windows good luck
