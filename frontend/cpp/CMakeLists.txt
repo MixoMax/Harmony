@@ -60,6 +60,7 @@ add_executable(Harmony
         src/graphics/shaders/ShaderInitializer.h
         src/supporters/InputManager.cpp
         src/supporters/InputManager.h
+        src/supporters/interpolation.h
 )
 
 #include directories

@@ -27,7 +27,10 @@ void main()
     float d = roundedBox(uv, uSize, uRadius);
 
     if (d <= 0) {
-        fragColor = uIsSelected ? uColor * .5 : uColor;
+        fragColor = uColor;
+        if (uIsSelected) {
+            fragColor.xyz *= .5;
+        }
         return;
     }
     discard;

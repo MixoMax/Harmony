@@ -1,10 +1,13 @@
 #include "GraphicsManager.h"
+
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 #include "../settings.h"
 #include "../supporters/InputManager.h"
+#include "../supporters/interpolation.h"
 #include "meshes/MeshInitializer.h"
 #include "shaders/ShaderInitializer.h"
 
@@ -116,8 +119,10 @@ void GraphicsManager::start() {
 
 
     FilledButton button1{};
-    button1.setSize(.5, .5);
+    button1.setSize(.7, .25);
+    button1.setColor(vec4(45 / 255.f, 120 / 255.f, 72 / 255.f, 1));
     button1.setRadius(.1);
+    button1.setRotation(.4);
     button1.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
             std::cout << "Hey" << std::endl;
@@ -134,7 +139,7 @@ void GraphicsManager::start() {
         mouseX = mouseX * 2 - 1;
         mouseY = -mouseY * 2 + 1;
 
-
+        button1.setRotation(Interpolation::easeInElastic(std::sin(glfwGetTime() * 2.f) * .5 + .5) * .3f);
         button1.draw();
 
 
