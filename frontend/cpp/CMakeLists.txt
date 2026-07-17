@@ -41,6 +41,25 @@ add_executable(Harmony
         src/voiceChannels/PulseAudioDeviceEnumeration.h
         src/graphics/GraphicsManager.cpp
         src/graphics/GraphicsManager.h
+        src/graphics/meshes/mesh.cpp
+        src/graphics/meshes/mesh.h
+        src/graphics/meshes/RectangularMesh.cpp
+        src/graphics/meshes/RectangularMesh.h
+        src/graphics/shaders/shader.cpp
+        src/supporters/fileWizard.h
+        src/supporters/fileWizard.cpp
+        src/supporters/stb_image_impl.cpp
+        src/graphics/basicShapes/Rectangle.cpp
+        src/graphics/basicShapes/Rectangle.h
+        src/supporters/SDF.h
+        src/graphics/widgets/FilledButton.cpp
+        src/graphics/widgets/FilledButton.h
+        src/graphics/widgets/Widget.cpp
+        src/graphics/widgets/Widget.h
+        src/graphics/meshes/MeshInitializer.h
+        src/graphics/shaders/ShaderInitializer.h
+        src/supporters/InputManager.cpp
+        src/supporters/InputManager.h
 )
 
 #include directories
@@ -54,11 +73,14 @@ target_include_directories(Harmony PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librarie
 target_include_directories(Harmony PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libraries/lib")
 target_include_directories(Harmony PRIVATE ${PULSE_INCLUDE_DIRS})
 
+add_subdirectory(BasicCppMathLibrary)
+
 target_link_libraries(Harmony
         ${glfwName}
         OpenGL::GL
         ${PULSE_LIBRARIES}
         ixwebsocket
+        BasicCppMathLibrary
 )
 
 # Resource Files

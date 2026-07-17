@@ -1,11 +1,12 @@
 #include "GraphicsManager.h"
-
-#include <algorithm>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 #include "../settings.h"
+#include "../supporters/InputManager.h"
+#include "meshes/MeshInitializer.h"
+#include "shaders/ShaderInitializer.h"
 
 GraphicsManager *GraphicsManager::instance = nullptr;
 
@@ -69,7 +70,7 @@ void GraphicsManager::setScreenSize(const int width, const int height) {
     glViewport(0, 0, screenWidth, screenHeight);
 }
 
-GraphicsManager::GraphicsManager() : screenWidth(100), screenHeight(100), screenRatio(1) {
+GraphicsManager::GraphicsManager() : screenWidth(100), screenHeight(100), screenRatio(1), mouseX(0), mouseY(0) {
 }
 
 GraphicsManager::~GraphicsManager() {
@@ -102,11 +103,39 @@ GraphicsManager *GraphicsManager::init() {
     return instance;
 }
 
+double GraphicsManager::getScreenRatio() const {
+    return screenRatio;
+}
+
 void GraphicsManager::start() {
     glfwShowWindow(window);
 
+    InputManager::initializeInputManager();
+    initializeMeshes();
+    initializeShaders();
+
+
+    FilledButton button1{};
+    button1.setSize(.5, .5);
+    button1.setRadius(.1);
+    button1.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+            std::cout << "Hey" << std::endl;
+        }
+    });
+
     while (!glfwWindowShouldClose(window) && running) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        mouseX /= screenWidth;
+        mouseY /= screenHeight;
+        mouseX = mouseX * 2 - 1;
+        mouseY = -mouseY * 2 + 1;
+
+
+        button1.draw();
 
 
         glfwSwapBuffers(window);
@@ -116,5 +145,7 @@ void GraphicsManager::start() {
 }
 
 void GraphicsManager::cleanup() {
+    deleteShaders();
+    deleteMeshes();
     delete instance;
 }

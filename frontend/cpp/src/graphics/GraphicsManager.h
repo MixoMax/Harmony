@@ -10,7 +10,7 @@ class GraphicsManager {
     int screenWidth;
     int screenHeight;
     double screenRatio;
-    GLFWwindow *window = nullptr;
+
 
     [[nodiscard]] bool initOpenGL();
 
@@ -21,9 +21,14 @@ class GraphicsManager {
     ~GraphicsManager();
 
 public:
+    GLFWwindow *window = nullptr;
+    double mouseX, mouseY;
+
     static GraphicsManager &getInstance();
 
     static GraphicsManager *init();
+
+    [[nodiscard]] double getScreenRatio() const;
 
     void start();
 
