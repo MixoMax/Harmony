@@ -4,12 +4,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include "../settings.h"
 #include "../supporters/InputManager.h"
 #include "../supporters/interpolation.h"
 #include "meshes/MeshInitializer.h"
 #include "shaders/ShaderInitializer.h"
+#include "text/CharacterManager.h"
 
 GraphicsManager *GraphicsManager::instance = nullptr;
 
@@ -110,12 +113,21 @@ double GraphicsManager::getScreenRatio() const {
     return screenRatio;
 }
 
+int GraphicsManager::getScreenWidth() const {
+    return screenWidth;
+}
+
+int GraphicsManager::getScreenHeight() const {
+    return screenHeight;
+}
+
 void GraphicsManager::start() {
     glfwShowWindow(window);
 
     InputManager::initializeInputManager();
     initializeMeshes();
     initializeShaders();
+    CharacterManager::initializeCharacterManager();
 
 
     FilledButton button1{};
@@ -139,8 +151,12 @@ void GraphicsManager::start() {
         mouseX = mouseX * 2 - 1;
         mouseY = -mouseY * 2 + 1;
 
-        button1.setRotation(Interpolation::easeInElastic(std::sin(glfwGetTime() * 2.f) * .5 + .5) * .3f);
+        const float rotation = Interpolation::easeInElastic(std::sin(glfwGetTime() * 2.f) * .5 + .5) * .3f;
+        button1.setRotation(rotation);
         button1.draw();
+
+        CharacterManager::drawText("Start Harmony Client", 0.0f, 0.0f, .24, rotation, vec4(1, 1, 1, 1),
+                                   Alignment::Center);
 
 
         glfwSwapBuffers(window);
@@ -152,5 +168,6 @@ void GraphicsManager::start() {
 void GraphicsManager::cleanup() {
     deleteShaders();
     deleteMeshes();
+    CharacterManager::deleteCharacterManager();
     delete instance;
 }

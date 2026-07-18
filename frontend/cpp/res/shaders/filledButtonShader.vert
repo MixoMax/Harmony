@@ -14,9 +14,8 @@ out vec2 vUV;
 
 void main()
 {
-    float rotation = uRotation;
+    mat2 rotationMatrix = mat2(cos(uRotation), -sin(uRotation), sin(uRotation), cos(uRotation));
 
-    mat2 rotationMatrix = mat2(cos(rotation), -sin(rotation), sin(rotation), cos(rotation));
     vec2 pos = aVertexPosition;
     pos *= uSize;
     vUV = pos;

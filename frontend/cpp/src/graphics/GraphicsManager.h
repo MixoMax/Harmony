@@ -30,6 +30,10 @@ public:
 
     [[nodiscard]] double getScreenRatio() const;
 
+    [[nodiscard]] int getScreenWidth() const;
+
+    [[nodiscard]] int getScreenHeight() const;
+
     void start();
 
     static void cleanup();
@@ -37,4 +41,3 @@ public:
 
 
 #endif //HARMONY_GRAPHICSMANAGER_H
-

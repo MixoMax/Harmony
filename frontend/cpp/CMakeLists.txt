@@ -25,6 +25,9 @@ FetchContent_Declare(
 set(USE_TLS ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(ixwebsocket)
 
+#fonts
+find_package(Freetype REQUIRED)
+
 
 if (MINGW)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -61,6 +64,10 @@ add_executable(Harmony
         src/supporters/InputManager.cpp
         src/supporters/InputManager.h
         src/supporters/interpolation.h
+        src/graphics/text/CharacterManager.cpp
+        src/graphics/text/CharacterManager.h
+        src/supporters/Alignment.h
+        src/supporters/Alignment.cpp
 )
 
 #include directories
@@ -82,6 +89,7 @@ target_link_libraries(Harmony
         ${PULSE_LIBRARIES}
         ixwebsocket
         BasicCppMathLibrary
+        Freetype::Freetype
 )
 
 # Resource Files
