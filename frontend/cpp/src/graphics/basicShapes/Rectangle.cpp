@@ -17,7 +17,8 @@ Rectangle::Rectangle(const float x, const float y, const float width, const floa
 
 bool Rectangle::isHovered(const float mouseX, const float mouseY) const {
     vec2 uv(mouseX, mouseY);
-    uv.x *= static_cast<float>(GraphicsManager::getInstance().getScreenRatio());
+    uv.x *= static_cast<float>(GraphicsManager::getInstance().getScreenWidth());
+    uv.y *= static_cast<float>(GraphicsManager::getInstance().getScreenHeight());
     uv.x -= x;
     uv.y -= y;
 

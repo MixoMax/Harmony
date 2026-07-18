@@ -5,7 +5,7 @@ layout (location = 0) in vec2 aVertexPosition;
 
 uniform vec2 uSize = vec2(1, 1);
 uniform vec2 uPosition = vec2(0);
-uniform float uRatio = 1;
+uniform vec2 uScreenSize = vec2(1, 1);
 uniform float uRotation = 0;
 uniform float uTime = 0;
 
@@ -22,7 +22,7 @@ void main()
 
     pos = rotationMatrix * pos;
     pos += uPosition;
-    pos.x /= uRatio;
+    pos /= uScreenSize;
 
     vec4 renderPos = vec4(pos, 0, 1);
     gl_Position = renderPos;

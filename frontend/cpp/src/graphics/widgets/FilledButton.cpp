@@ -69,7 +69,8 @@ void FilledButton::draw() const {
         } else {
             glUniform1i(shader->getUniform("uIsSelected"), 0);
         }
-        glUniform1f(shader->getUniform("uRatio"), static_cast<float>(graphicsManager.getScreenRatio()));
+        glUniform2f(shader->getUniform("uScreenSize"), static_cast<float>(graphicsManager.getScreenWidth()),
+                    static_cast<float>(graphicsManager.getScreenHeight()));
         glUniform2f(shader->getUniform("uSize"), rectangle.width, rectangle.height);
         glUniform1f(shader->getUniform("uRadius"), rectangle.radius);
         glUniform1f(shader->getUniform("uRotation"), rectangle.rotation);

@@ -131,15 +131,17 @@ void GraphicsManager::start() {
 
 
     FilledButton button1{};
-    button1.setSize(.7, .25);
+    button1.setSize(1400, 300);
     button1.setColor(vec4(45 / 255.f, 120 / 255.f, 72 / 255.f, 1));
-    button1.setRadius(.1);
+    button1.setRadius(100);
     button1.setRotation(.4);
     button1.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
             std::cout << "Hey" << std::endl;
         }
     });
+
+    double lastUpdate = glfwGetTime();
 
     while (!glfwWindowShouldClose(window) && running) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -158,6 +160,13 @@ void GraphicsManager::start() {
         CharacterManager::drawText("Start Harmony Client", 0.0f, 0.0f, .24, rotation, vec4(1, 1, 1, 1),
                                    Alignment::Center);
 
+        const double now = glfwGetTime();
+        CharacterManager::drawText(std::to_string(static_cast<int>(std::round(1 / (now - lastUpdate)))),
+                                   -static_cast<float>(screenWidth), static_cast<float>(screenHeight),
+                                   .1, 0,
+                                   vec4(1, 1, 1, 1),
+                                   Alignment::TopLeft);
+        lastUpdate = now;
 
         glfwSwapBuffers(window);
 
