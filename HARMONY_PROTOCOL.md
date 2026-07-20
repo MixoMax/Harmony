@@ -32,7 +32,7 @@ the honest current state of `backend/`.
 
 ## 2. REST API [spec only, backend has zero real routes beyond an empty stub]
 
-Base path: **`/api/v1`**. Auth via `Authorization: Bearer <token>` in the header. Tokens are issued on login and expire after a fixed duration.
+Base path: `/api/v1`. Auth via `Authorization: Bearer <token>` except where noted.
 
 ### 2.1 Auth
 | Method | Path | Notes |
@@ -79,9 +79,17 @@ This layer is intentionally boring and REST-y — no client-agnostic reason for 
 
 ## 3. The Gateway (WebSocket) [spec only, does not exist in `backend/`]
 
-`wss://<host>/gateway?token=<auth_token>&device_id=<device_id>`
+Two distinct families of WebSocket connection, both under `/gateway`:
 
-One connection per device. All frames are JSON: `{"op": "<string>", "d": {...}}`.
+- **Session gateway** — `wss://<host>/gateway?token=<auth_token>&device_id=<device_id>`. One per
+  device, opened on login, independent of any voice channel. Carries presence/text (§3.1–3.2) and is
+  also where a client sends `voice_join`/`voice_leave` to enter/leave a voice channel.
+- **Voice-channel gateways** — `wss://<host>/gateway/{channel_id}/{orchestration|audio|video}`. Three
+  separate connections, all scoped to one voice channel, opened only while a client is in that channel
+  (§3.3). Not the same connection as the session gateway above, despite sharing the `/gateway` prefix.
+
+All JSON frames on either family: `{"op": "<string>", "d": {...}}`. The `audio` and `video` connections
+carry binary frames instead (§4.1, §4.2).
 
 ### 3.1 Lifecycle ops
 - `hello` (server→client, on connect) — `{heartbeat_interval_ms}`
@@ -108,7 +116,13 @@ One connection per device. All frames are JSON: `{"op": "<string>", "d": {...}}`
 - `ice_candidate` (client→server→target client) — relays `{candidate, sdp_mid}`-style data so two
   clients can attempt a direct UDP path for a video stream without the server ever seeing that media.
 - `video_fallback_ready` (either direction) — negotiated when hole-punching fails or times out and the
-  client instead opens/uses connection 3 (§4.2) and subscribes to that stream from the server.
+  client instead opens/uses the `video` connection (§4.2) and subscribes to that stream from the server.
+
+**Note on scope:** `orchestration` is opened on `voice_join` (sent over the session gateway) and closed
+on `voice_leave`, alongside `audio` and the optional `video` connection — it is not the same connection
+as the always-on session gateway in §3.1–3.2, even though both carry similar-looking JSON ops. Splitting
+it out per-channel keeps a client's voice-channel state (and its ability to just close all three sockets
+on leave) fully independent of its session-level connection.
 
 ---
 
@@ -119,21 +133,20 @@ was fast enough to use in production. **Result: it is** — audio always goes ov
 WebSocket, no P2P, no raw UDP. P2P/UDP is used for video only, where the bandwidth math (§ original
 hop-count table) makes server-relaying-everything a much bigger cost than for audio.
 
-This means voice channels are not one connection but **up to three separate WebSockets per client**,
-each with a distinct purpose:
+This means being in a voice channel means **three separate WebSockets per client**, all scoped to that
+channel, all opened on `voice_join` and closed on `voice_leave`:
 
-| # | Connection | Required? | Carries |
-|---|---|---|---|
-| 1 | **Orchestration** | always, one per session (not per voice channel) | everything in §3: presence, key rotation/offers, voice join/leave signaling, ICE candidate exchange for video |
-| 2 | **Audio** | required while in a voice channel | binary-framed, encrypted audio bytes, server-relayed |
-| 3 | **Video** | optional, opt-in per viewer | binary-framed, encrypted video bytes for whichever stream(s) the client has subscribed to, server-relayed as fallback when P2P isn't viable |
+| # | Connection | URL | Required? | Carries |
+|---|---|---|---|---|
+| 1 | **Orchestration** | `/gateway/{channel_id}/orchestration` | always, while in the channel | key rotation/offers, ICE candidate exchange, video relay subscribe/unsubscribe (§3.3–3.5) |
+| 2 | **Audio** | `/gateway/{channel_id}/audio` | always, while in the channel | binary-framed, encrypted audio bytes, server-relayed |
+| 3 | **Video** | `/gateway/{channel_id}/video` | optional, opt-in per viewer | binary-framed, encrypted video bytes for whichever stream(s) the client has subscribed to, server-relayed as fallback when P2P isn't viable |
 
-Connection 1 already exists conceptually as "the gateway" in §3 — it's one per client session, not one
-per voice channel, and stays open regardless of voice activity. Connections 2 and 3 are voice-channel
-scoped: opened on `voice_join`, closed on `voice_leave`.
+None of these three is the session gateway from §3.1–3.2 — that one stays open per-device regardless of
+voice activity and is only used to *initiate* the join (`voice_join`) before these three are opened.
 
 ### 4.1 Audio — always server-relayed WebSocket
-`wss://<host>/voice/{channel_id}/audio?token=<auth_token>&device_id=<device_id>`
+`wss://<host>/gateway/{channel_id}/audio?token=<auth_token>&device_id=<device_id>`
 
 - Binary WS frames, not JSON. Each frame: `[4-byte sender key epoch][nonce][ciphertext]`. Ciphertext is
   the PCM/opus frame encrypted with the sender's current symmetric key (AES-GCM or ChaCha20-Poly1305 —
@@ -145,15 +158,17 @@ scoped: opened on `voice_join`, closed on `voice_leave`.
 - No P2P path for audio at all — the benchmark settled this, don't relitigate it per-client.
 
 ### 4.2 Video — P2P first, optional WebSocket fallback
-- Orchestrated over connection 1: ICE candidates are exchanged via `ice_candidate` (§3.5) so two clients
-  can attempt a direct UDP path.
-- **Only clients who want to watch need to open connection 3 at all** — this is what makes it "optional
-  to join." A client that's only listening to voice never opens it.
+`wss://<host>/gateway/{channel_id}/video?token=<auth_token>&device_id=<device_id>`
+
+- Orchestrated over connection 1 (`orchestration`): ICE candidates are exchanged via `ice_candidate`
+  (§3.5) so two clients can attempt a direct UDP path.
+- **Only clients who want to watch need to open connection 3 (`video`) at all** — this is what makes it
+  "optional to join." A client that's only listening to voice never opens it.
 - Because connection 3 carries potentially many participants' video multiplexed together, the viewing
-  client must tell the server which stream(s) to relay to it:
-  - `video_subscribe` (client→server, over connection 3 or via §3 orchestration — TBD) — `{user_id, device_id}`
-  - `video_unsubscribe` — same shape
-  - Frames on the wire are prefixed with a sender identifier so the client can demux: `[sender_user_id][sender_device_id][nonce][ciphertext]`
+  client tells the server which stream(s) to relay to it via `video_relay_subscribe` /
+  `video_relay_unsubscribe` on the `orchestration` connection (§3.3) — `{from_user_id, from_device_id}`.
+  Frames on the wire are then prefixed with a sender identifier so the client can demux:
+  `[sender_user_id][sender_device_id][nonce][ciphertext]`
 - When P2P succeeds between two peers, that pair's stream doesn't touch connection 3 at all — it's a
   raw UDP path negotiated purely via ICE, established out-of-band from the server entirely.
 - Relay topology above 4 viewers (who forwards to whom) is unchanged from the README's original
@@ -161,8 +176,8 @@ scoped: opened on `voice_join`, closed on `voice_leave`.
 
 ### 4.3 Fallback trigger
 - If ICE negotiation fails (symmetric NAT, restrictive firewall) within some negotiated timeout, both
-  sides fall back to requesting that stream over connection 3 instead. The server relays blind — same
-  trust model as everything else it touches.
+  sides fall back to requesting that stream over the `video` connection instead. The server relays
+  blind — same trust model as everything else it touches.
 
 ---
 

@@ -20,9 +20,10 @@ subset it cares about.
 | Layer | Transport | Purpose | Spec section |
 |---|---|---|---|
 | **REST API** | HTTPS | Accounts, forums, channels, message history, key publishing, invites | §2 |
-| **Orchestration gateway** | WebSocket (`wss://`) | Presence, typing, live messages, voice-channel signaling, key rotation, ICE candidate exchange | §3 |
-| **Audio transport** | WebSocket, always server-relayed | Encrypted voice bytes — benchmarking showed WS-over-TCP is fast enough, so audio never attempts P2P | §4.1 |
-| **Video transport** | P2P UDP first, optional WebSocket fallback | Encrypted video bytes; a client only opens this connection if it wants to watch | §4.2 |
+| **Session gateway** | WebSocket, `wss://.../gateway` (per device) | Presence, typing, live messages, initiating voice-channel joins | §3.1–3.2 |
+| **Orchestration** | WebSocket, `wss://.../gateway/{channel_id}/orchestration` (per voice channel) | Key rotation/offers, ICE candidate exchange, video relay subscriptions | §3.3–3.5 |
+| **Audio transport** | WebSocket, `wss://.../gateway/{channel_id}/audio`, always server-relayed | Encrypted voice bytes — benchmarking showed WS-over-TCP is fast enough, so audio never attempts P2P | §4.1 |
+| **Video transport** | P2P UDP first, `wss://.../gateway/{channel_id}/video` as fallback | Encrypted video bytes; a client only opens this connection if it wants to watch | §4.2 |
 
 This repo currently contains a reference server (`backend/`) and two reference clients (`static/` web
 client, `frontend/cpp/` CLI client). **The two reference clients are not yet compatible with each
