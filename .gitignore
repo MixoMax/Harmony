@@ -40,3 +40,4 @@ __pycache__/
 .idea/
 *.iml
 /frontend/cpp/_deps
+digest.txt
