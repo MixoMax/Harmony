@@ -145,4 +145,6 @@ void VoiceChannelManager::join() {
     instance.shouldConnect = true;
     instance.shouldConnect.notify_all();
     instance.thread.join();
+
+    TransmissionManager::cleanUp();
 }

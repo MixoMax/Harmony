@@ -30,6 +30,9 @@ public:
     virtual void send(std::string payload) = 0;
 
     void setReceiveCallback(std::function<void(const char *data, int length)> callback);
+
+
+    static void cleanUp();
 };
 
 
