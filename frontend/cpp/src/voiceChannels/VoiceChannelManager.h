@@ -8,7 +8,6 @@
 
 class VoiceChannelManager {
     std::atomic_bool shouldConnect{false};
-    std::atomic_bool isConnected{false};
     std::atomic_bool stopThread{false};
 
     std::thread thread;

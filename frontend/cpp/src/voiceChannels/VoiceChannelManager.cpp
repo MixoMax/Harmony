@@ -13,6 +13,7 @@
 #include <pulse/simple.h>
 
 #include "../settings.h"
+#include "transmissionTechnologies/TransmissionManager.h"
 
 
 VoiceChannelManager::VoiceChannelManager() {
@@ -60,47 +61,26 @@ VoiceChannelManager::VoiceChannelManager() {
 
             std::cout << "> Opening Server-connection..." << std::endl;
 
-            ix::WebSocket webSocket;
-            webSocket.setUrl("ws://" + serverURL + "/ws/" + roomName + "/" + userName);
-            webSocket.setOnMessageCallback(
-                [this, &playbackStream, &paPlaybackErrorCode](const ix::WebSocketMessagePtr &msg) {
-                    switch (msg->type) {
-                        case ix::WebSocketMessageType::Open:
-                            std::cout << "> Connected to Server" << std::endl;
-                            isConnected = true;
-                            break;
-                        case ix::WebSocketMessageType::Close:
-                            std::cout << "> Disconnected from Server" << std::endl;
-                            isConnected = false;
-                            break;
-                        case ix::WebSocketMessageType::Error:
-                            std::cout << "> !WS ERROR!: " << msg->errorInfo.reason << std::endl;
-                            break;
-                        case ix::WebSocketMessageType::Message:
-                            /*receiving audio*/
-                            if (pa_simple_write(playbackStream, msg->str.data(), msg->str.size(),
-                                                &paPlaybackErrorCode) < 0) {
-                                fprintf(stderr, "pa_simple_write() failed: %s\n", pa_strerror(paPlaybackErrorCode));
-                                break;
-                            }
-                            break;
-                        default:
-                            std::cout << "> Unknown message type: " << static_cast<int>(msg->type) << std::endl;
-                            break;
+            TransmissionManager::instance->roomName = roomName;
+            TransmissionManager::instance->userName = userName;
+            TransmissionManager::instance->setReceiveCallback(
+                [&playbackStream, &paPlaybackErrorCode](const char *data, const int length) {
+                    if (pa_simple_write(playbackStream, data, length,
+                                        &paPlaybackErrorCode) < 0) {
+                        fprintf(stderr, "pa_simple_write() failed: %s\n", pa_strerror(paPlaybackErrorCode));
                     }
                 });
-            webSocket.enableAutomaticReconnection();
+            TransmissionManager::instance->connect();
             mutex.unlock();
-            webSocket.start();
 
             bool wasConnected{false};
 
             while (shouldConnect && !stopThread) {
-                if (!isConnected && wasConnected) {
+                if (!TransmissionManager::instance->isConnected && wasConnected) {
                     //ws disconnected
                     break;
                 }
-                if (!isConnected) {
+                if (!TransmissionManager::instance->isConnected) {
                     //ws connection not ready yet
                     continue;
                 }
@@ -113,16 +93,15 @@ VoiceChannelManager::VoiceChannelManager() {
                     fprintf(stderr, "pa_simple_read() failed: %s\n", pa_strerror(paCaptureErrorCode));
                     break;
                 }
-                std::string payload{
+                const std::string payload{
                     reinterpret_cast<const char *>(captureBuffer.data()),
                     captureBuffer.size() * sizeof(int16_t)
                 };
-                if (!webSocket.sendBinary(payload).success) {
-                    std::cerr << "failed to send binaries" << std::endl;
-                }
+                TransmissionManager::instance->send(payload);
             }
 
-            webSocket.close();
+            TransmissionManager::instance->disconnect();
+
 
             pa_simple_free(captureStream);
 

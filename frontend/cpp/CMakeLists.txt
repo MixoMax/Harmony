@@ -71,6 +71,8 @@ add_executable(Harmony
         #        src/supporters/Alignment.cpp
         src/voiceChannels/transmissionTechnologies/TransmissionManager.cpp
         src/voiceChannels/transmissionTechnologies/TransmissionManager.h
+        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.cpp
+        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.h
 )
 
 #include directories
