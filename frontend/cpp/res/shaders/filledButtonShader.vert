@@ -11,11 +11,12 @@ uniform float uTime = 0;
 
 
 out vec2 vUV;
+out vec2 vPos;
 
 void main()
 {
-    mat2 rotationMatrix = mat2(cos(uRotation), -sin(uRotation), sin(uRotation), cos(uRotation));
 
+    mat2 rotationMatrix = mat2(cos(uRotation), -sin(uRotation), sin(uRotation), cos(uRotation));
     vec2 pos = aVertexPosition;
     pos *= uSize;
     vUV = pos;
@@ -24,6 +25,8 @@ void main()
     pos += uPosition;
     pos /= uScreenSize;
 
+    vPos = pos;
+    
     vec4 renderPos = vec4(pos, 0, 1);
     gl_Position = renderPos;
 }

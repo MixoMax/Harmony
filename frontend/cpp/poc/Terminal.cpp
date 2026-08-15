@@ -9,9 +9,9 @@
 #include <vector>
 #include <sys/stat.h>
 
-#include "settings.h"
-#include "voiceChannels/PulseAudioDeviceEnumeration.h"
-#include "voiceChannels/VoiceChannelManager.h"
+#include "../src/settings.h"
+#include "../src/voiceChannels/PulseAudioDeviceEnumeration.h"
+#include "../src/voiceChannels/VoiceChannelManager.h"
 
 int main(const int argc, const char *argv[]) {
     std::cout << "> Starting Harmony..." << std::endl;

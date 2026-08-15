@@ -1,18 +1,20 @@
+import asyncio
+import os
+
 from fastapi import FastAPI, websockets
 from fastapi.responses import FileResponse, JSONResponse
-import uuid
-import os
-import asyncio
 
 app = FastAPI()
 
+
 class WebSocketManager:
-    rooms: dict[str, list[tuple[websockets.WebSocket, str]]] = {} # room_id: list of tuples (websocket, username)
+    rooms: dict[str, list[tuple[websockets.WebSocket, str]]] = {}  # room_id: list of tuples (websocket, username)
 
     def __init__(self):
         self.rooms = {}
 
     async def connect(self, websocket: websockets.WebSocket, room_id: str, username: str):
+        print(f"User {username} connected to room {room_id}")
         if room_id not in self.rooms:
             self.rooms[room_id] = []
         self.rooms[room_id].append((websocket, username))
@@ -34,11 +36,14 @@ class WebSocketManager:
     def get_room_data(self):
         return {room_id: [user for _, user in users] for room_id, users in self.rooms.items()}
 
+
 wsm = WebSocketManager()
+
 
 @app.get("/api/v1/rooms")
 async def get_rooms():
     return JSONResponse(content=wsm.get_room_data())
+
 
 @app.websocket("/ws/{room_id}/{username}")
 async def websocket_endpoint(websocket: websockets.WebSocket, room_id: str, username: str):
@@ -50,6 +55,7 @@ async def websocket_endpoint(websocket: websockets.WebSocket, room_id: str, user
     except websockets.WebSocketDisconnect:
         await wsm.disconnect(websocket, room_id)
 
+
 @app.get("/{path:path}")
 async def serve_file(path: str):
     if path == "":
@@ -60,4 +66,3 @@ async def serve_file(path: str):
         return FileResponse(file_path)
     else:
         return JSONResponse(content={"error": "File not found"}, status_code=404)
-

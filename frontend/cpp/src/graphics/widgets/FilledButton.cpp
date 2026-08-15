@@ -76,6 +76,7 @@ void FilledButton::draw() const {
         glUniform1f(shader->getUniform("uRotation"), rectangle.rotation);
         glUniform2f(shader->getUniform("uPosition"), rectangle.x, rectangle.y);
         glUniform4f(shader->getUniform("uColor"), color.x, color.y, color.z, color.w);
+        glUniform1f(shader->getUniform("uTime"), glfwGetTime());
 
         mesh->draw();
     }

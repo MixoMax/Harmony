@@ -132,7 +132,7 @@ void GraphicsManager::start() {
 
     FilledButton button1{};
     button1.setSize(1400, 300);
-    button1.setColor(vec4(45 / 255.f, 120 / 255.f, 72 / 255.f, 1));
+    button1.setColor(vec4(0.8353, 0.0784, 0.7882, 1));
     button1.setRadius(100);
     button1.setRotation(.4);
     button1.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
@@ -140,6 +140,8 @@ void GraphicsManager::start() {
             std::cout << "Hey" << std::endl;
         }
     });
+
+    Shader background{"backgroundShader"};
 
     double lastUpdate = glfwGetTime();
 
@@ -153,7 +155,16 @@ void GraphicsManager::start() {
         mouseX = mouseX * 2 - 1;
         mouseY = -mouseY * 2 + 1;
 
-        const float rotation = Interpolation::easeInElastic(std::sin(glfwGetTime() * 2.f) * .5 + .5) * .3f;
+        // float t = std::sin(glfwGetTime() * 2.f) * .5 + .5;
+        const float fractT = glfwGetTime() - static_cast<int>(glfwGetTime());
+        const float rotation = std::lerp(fractT,
+                                         1 - Interpolation::easeOutElastic(fractT),
+                                         std::clamp(fractT * 2, 0.f, 1.f));
+
+        background.useShader();
+        glUniform1f(background.getUniform("uTime"), glfwGetTime());
+        RectangularMesh::getInstance()->draw();
+
         button1.setRotation(rotation);
         button1.draw();
 

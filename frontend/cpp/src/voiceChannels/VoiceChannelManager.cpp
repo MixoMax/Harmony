@@ -61,7 +61,7 @@ VoiceChannelManager::VoiceChannelManager() {
             std::cout << "> Opening Server-connection..." << std::endl;
 
             ix::WebSocket webSocket;
-            webSocket.setUrl("wss://" + serverURL + "/ws/" + roomName + "/" + userName);
+            webSocket.setUrl("ws://" + serverURL + "/ws/" + roomName + "/" + userName);
             webSocket.setOnMessageCallback(
                 [this, &playbackStream, &paPlaybackErrorCode](const ix::WebSocketMessagePtr &msg) {
                     switch (msg->type) {

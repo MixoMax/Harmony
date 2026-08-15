@@ -8,6 +8,8 @@ uniform float uRotation = 0;
 
 out vec2 vUV;
 
+out vec2 vPos;
+
 void main()
 {
     mat2 rotationMatrix = mat2(cos(uRotation), -sin(uRotation), sin(uRotation), cos(uRotation));
@@ -16,6 +18,8 @@ void main()
     vec2 pos = aVertexPosition.xy;
     pos = rotationMatrix * pos;
     pos /= uScreenSize;
+
+    vPos = pos;
 
 
     vec4 renderPos = vec4(pos, 0, 1);

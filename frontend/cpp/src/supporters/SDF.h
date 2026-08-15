@@ -12,7 +12,7 @@
 [[nodiscard]] inline float sdBox(const vec2 &uv, const float width, const float height) {
     const vec2 d = uv.abs() - vec2(width, height);
 
-    return d.max(0.f).length() + std::min(d.max(), 0.f);
+    return d.max(vec2(0.f)).length() + std::min(d.max(), 0.f);
 }
 
 [[nodiscard]] inline float sdRoundedBox(const vec2 &uv, const float width, const float height, const float radius) {

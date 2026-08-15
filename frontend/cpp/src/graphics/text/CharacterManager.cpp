@@ -121,6 +121,7 @@ void CharacterManager::drawText(const std::string &text,
                 static_cast<float>(graphicsManager.getScreenHeight()));
     glUniform1f(shader->getUniform("uRotation"), rotation);
     glUniform4f(shader->getUniform("uColor"), color.x, color.y, color.z, color.w);
+    glUniform1f(shader->getUniform("uTime"), glfwGetTime());
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
 
