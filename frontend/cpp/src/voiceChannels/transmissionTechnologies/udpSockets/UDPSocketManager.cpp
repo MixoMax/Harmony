@@ -34,9 +34,12 @@ void UDPSocketManager::connect() {
         while (isConnected) {
             sockaddr_in receiveAddress{};
             socklen_t receiveAddressLength = sizeof(receiveAddress);
-            const int bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
-                                           reinterpret_cast<struct sockaddr *>(&receiveAddress), &receiveAddressLength);
-            if (bytesRead < 0) {
+            const ssize_t bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
+                                               reinterpret_cast<struct sockaddr *>(&receiveAddress),
+                                               &receiveAddressLength);
+            std::cout << "> received " << bytesRead << " bytes" << std::endl;
+
+            if (bytesRead < 4) {
                 if (isConnected) {
                     std::cerr << "Error receiving data" << strerror(errno) << std::endl;
                     isConnected = false;
@@ -62,8 +65,8 @@ void UDPSocketManager::connect() {
                 sender.receiveSequenceNumber = sequenceNumber;
 
                 receiveCallback(buffer + 4, bytesRead - 4);
-                // std::cout << "> total receiving progress: " <<
-                //         static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
+                std::cout << "> total receiving progress: " <<
+                        static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
             }
         }
     });
@@ -97,6 +100,7 @@ void UDPSocketManager::send(char *data, const size_t length) {
 
     // auto t1 = std::chrono::high_resolution_clock::now();
     for (const auto &user: otherUsers) {
+        std::cout << "> sending to " << user.name << std::endl;
         const ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &user.sockaddr,
                                           sizeof(user.sockaddr));
         if (sendResult < 0) {

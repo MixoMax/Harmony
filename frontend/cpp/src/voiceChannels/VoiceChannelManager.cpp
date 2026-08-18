@@ -62,6 +62,9 @@ VoiceChannelManager::VoiceChannelManager() {
             TransmissionManager::instance->userName = userName;
             TransmissionManager::instance->setReceiveCallback(
                 [&playbackStream, &paPlaybackErrorCode](const char *data, const int length) {
+                    if (!playbackStream) {
+                        return;
+                    }
                     if (pa_simple_write(playbackStream, data, length,
                                         &paPlaybackErrorCode) < 0) {
                         fprintf(stderr, "pa_simple_write() failed: %s\n", pa_strerror(paPlaybackErrorCode));
@@ -101,6 +104,7 @@ VoiceChannelManager::VoiceChannelManager() {
 
             pa_simple_drain(playbackStream, &paCaptureErrorCode);
             pa_simple_free(playbackStream);
+            playbackStream = nullptr;
         }
         std::cout << "> VoiceChannelManager Thread stopped" << std::endl;
         return 0;
