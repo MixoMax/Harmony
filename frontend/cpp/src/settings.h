@@ -9,7 +9,6 @@ inline constexpr int packageSize = 1024;
 //"harmony.linush.org";
 inline const std::string serverURL = "https://harmony.timpagels.de";
 inline const std::string wsServerURL = "wss://harmony.timpagels.de";
-inline constexpr int ownPort = 8001;
 
 inline constexpr int fontQualityInPixel = 1024;
 

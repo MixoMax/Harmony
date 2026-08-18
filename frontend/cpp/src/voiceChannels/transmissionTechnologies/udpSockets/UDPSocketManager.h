@@ -11,10 +11,6 @@
 
 
 class UDPSocketManager : public TransmissionManager {
-    int udpSocket{0};
-    sockaddr_in ownAddress{};
-
-
     std::unique_ptr<std::thread> receiveThread{nullptr};
 
     u_int32_t sendSequenceNumber{0};

@@ -14,8 +14,15 @@ using json = nlohmann::json;
 class Client {
     static ix::WebSocket roomWebsocket;
 
+    static void bindPort();
+
 public:
+    static int port;
+    static int udpSocket;
+    static sockaddr_in ownAddress;
+
     static std::vector<Room> getRooms();
+
 
     static void connectToRoom(const std::string &roomName, const std::string &username);
 

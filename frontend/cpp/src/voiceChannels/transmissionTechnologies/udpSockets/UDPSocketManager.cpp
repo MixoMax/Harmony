@@ -9,24 +9,11 @@
 #include <arpa/inet.h>
 
 #include "../../../settings.h"
+#include "../../../httpUtils/Client.h"
 
 void UDPSocketManager::connect() {
     TransmissionManager::connect();
     isConnected = true;
-    udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (udpSocket < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return;
-    }
-
-    ownAddress.sin_family = AF_INET;
-    ownAddress.sin_port = htons(ownPort);
-    ownAddress.sin_addr.s_addr = INADDR_ANY;
-    if (bind(udpSocket, reinterpret_cast<struct sockaddr *>(&ownAddress), sizeof(ownAddress)) < 0) {
-        std::cerr << "Error binding socket" << strerror(errno) << std::endl;
-        disconnect();
-        return;
-    }
 
 
     receiveThread = std::make_unique<std::thread>([this]() {
@@ -34,8 +21,8 @@ void UDPSocketManager::connect() {
         while (isConnected) {
             sockaddr_in receiveAddress{};
             socklen_t receiveAddressLength = sizeof(receiveAddress);
-            const ssize_t bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
-                                               reinterpret_cast<struct sockaddr *>(&receiveAddress),
+            const ssize_t bytesRead = recvfrom(Client::udpSocket, buffer, 4 + packageSize, 0,
+                                               reinterpret_cast<sockaddr *>(&receiveAddress),
                                                &receiveAddressLength);
             std::cout << "> received " << bytesRead << " bytes" << std::endl;
 
@@ -76,10 +63,10 @@ void UDPSocketManager::disconnect() {
     TransmissionManager::disconnect();
     isConnected = false;
 
-    if (udpSocket >= 0) {
-        shutdown(udpSocket, SHUT_RDWR);
-        close(udpSocket);
-        udpSocket = -1;
+    if (Client::udpSocket >= 0) {
+        shutdown(Client::udpSocket, SHUT_RDWR);
+        close(Client::udpSocket);
+        Client::udpSocket = -1;
     }
 
     if (receiveThread && receiveThread->joinable()) {
@@ -100,8 +87,9 @@ void UDPSocketManager::send(char *data, const size_t length) {
 
     // auto t1 = std::chrono::high_resolution_clock::now();
     for (const auto &user: otherUsers) {
-        std::cout << "> sending to " << user.name << std::endl;
-        const ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &user.sockaddr,
+        // std::cout << "> sending to " << user.name << std::endl;
+        const ssize_t sendResult = sendto(Client::udpSocket, sendBuffer, 4 + packageSize, 0,
+                                          (struct sockaddr *) &user.sockaddr,
                                           sizeof(user.sockaddr));
         if (sendResult < 0) {
             std::cerr << "Error sending data" << strerror(errno) << std::endl;

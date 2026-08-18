@@ -8,9 +8,40 @@
 #include "../settings.h"
 #include "../voiceChannels/VoiceChannelManager.h"
 #include "../voiceChannels/transmissionTechnologies/TransmissionManager.h"
+#include "../voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.h"
 #include "dataClasses/Room.h"
 
 ix::WebSocket Client::roomWebsocket{};
+
+void Client::bindPort() {
+    udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (udpSocket < 0) {
+        std::cerr << "Error creating socket" << std::endl;
+        return;
+    }
+
+    ownAddress.sin_family = AF_INET;
+    ownAddress.sin_port = htons(0);
+    ownAddress.sin_addr.s_addr = INADDR_ANY;
+    if (bind(udpSocket, reinterpret_cast<sockaddr *>(&ownAddress), sizeof(ownAddress)) < 0) {
+        std::cerr << "Error binding socket" << strerror(errno) << std::endl;
+        disconnectFromRoom();
+        return;
+    }
+
+    socklen_t ownAddressLength = sizeof(ownAddress);
+    if (getsockname(udpSocket, reinterpret_cast<sockaddr *>(&ownAddress), &ownAddressLength) < 0) {
+        std::cerr << "Error getting own address" << strerror(errno) << std::endl;
+        disconnectFromRoom();
+        return;
+    }
+    std::cout << "> bound to port " << ntohs(ownAddress.sin_port) << std::endl;
+    port = ntohs(ownAddress.sin_port);
+}
+
+int Client::port{0};
+int Client::udpSocket{0};
+sockaddr_in Client::ownAddress{};
 
 std::vector<Room> Client::getRooms() {
     httplib::Client cli(serverURL);
@@ -28,7 +59,9 @@ std::vector<Room> Client::getRooms() {
 
 void Client::connectToRoom(const std::string &roomName, const std::string &username) {
     std::cout << "> Client tries to connect to room: \"" << roomName << "\"..." << std::endl;
-    roomWebsocket.setUrl(wsServerURL + "/ws/" + roomName + "/" + username + "/" + std::to_string(ownPort));
+    bindPort();
+    roomWebsocket.setUrl(
+        wsServerURL + "/ws/" + roomName + "/" + username + "/" + std::to_string(port));
     roomWebsocket.setOnMessageCallback(
         [roomName, username](const ix::WebSocketMessagePtr &msg) {
             switch (msg->type) {
