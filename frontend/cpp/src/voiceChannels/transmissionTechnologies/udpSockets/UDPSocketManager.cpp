@@ -35,9 +35,9 @@ void UDPSocketManager::connect() {
 
 
     receiveThread = std::make_unique<std::thread>([this]() {
-        char buffer[packageSize];
+        char buffer[4 + packageSize];
         while (isConnected) {
-            int bytesRead = recvfrom(udpSocket, buffer, packageSize, 0,
+            int bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
                                      reinterpret_cast<struct sockaddr *>(&senderAddress), &senderAddressLength);
             if (bytesRead < 0) {
                 if (isConnected) {
@@ -46,7 +46,14 @@ void UDPSocketManager::connect() {
                     break;
                 }
             } else {
-                receiveCallback(buffer, bytesRead);
+                /*receive data*/
+                const uint32_t sequenceNumber = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+                if (sequenceNumber < receiveSequenceNumber) {
+                    continue;
+                }
+                receiveSequenceNumber = sequenceNumber;
+
+                receiveCallback(buffer + 4, bytesRead - 4);
             }
         }
     });
@@ -68,8 +75,15 @@ void UDPSocketManager::disconnect() {
     receiveThread.reset();
 }
 
-void UDPSocketManager::send(std::string payload) {
-    ssize_t sendResult = sendto(udpSocket, payload.c_str(), payload.length(), 0, (struct sockaddr *) &senderAddress,
+void UDPSocketManager::send(char *data, const size_t length) {
+    ++totalSendedPackages;
+    ++sendSequenceNumber;
+
+    char sendBuffer[4 + packageSize];
+    memcpy(sendBuffer, &sendSequenceNumber, 4); // hieran liegt es nicht
+    memcpy(sendBuffer + 4, data, length);
+
+    ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &senderAddress,
                                 senderAddressLength);
     if (sendResult < 0) {
         std::cerr << "Error sending data" << strerror(errno) << std::endl;

@@ -17,17 +17,19 @@ public:
     std::string roomName;
     std::string userName;
 
+    static long totalSendedPackages;
+
     std::atomic_bool isConnected{false};
 
     static TransmissionManager *instance;
 
     virtual ~TransmissionManager() = default;
 
-    virtual void connect() = 0;
+    virtual void connect();
 
     virtual void disconnect() = 0;
 
-    virtual void send(std::string payload) = 0;
+    virtual void send(char *data, size_t length) = 0;
 
     void setReceiveCallback(std::function<void(const char *data, int length)> callback);
 

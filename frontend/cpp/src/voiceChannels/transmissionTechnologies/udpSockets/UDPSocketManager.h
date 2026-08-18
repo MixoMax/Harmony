@@ -18,12 +18,15 @@ class UDPSocketManager : public TransmissionManager {
 
     std::unique_ptr<std::thread> receiveThread{nullptr};
 
+    u_int32_t sendSequenceNumber{0};
+    u_int32_t receiveSequenceNumber{0};
+
 public:
     void connect() override;
 
     void disconnect() override;
 
-    void send(std::string payload) override;
+    void send(char *data, size_t length) override;
 };
 
 

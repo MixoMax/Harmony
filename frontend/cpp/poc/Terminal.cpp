@@ -12,6 +12,7 @@
 #include "../src/settings.h"
 #include "../src/voiceChannels/PulseAudioDeviceEnumeration.h"
 #include "../src/voiceChannels/VoiceChannelManager.h"
+#include "../src/voiceChannels/transmissionTechnologies/TransmissionManager.h"
 
 int main(const int argc, const char *argv[]) {
     std::cout << "> Starting Harmony..." << std::endl;
@@ -25,6 +26,7 @@ int main(const int argc, const char *argv[]) {
             "Welcome to \x1b[31;1mH\x1b[32;1ma\x1b[33;1mr\x1b[34;1mm\x1b[35;1mo\x1b[36;1mn\x1b[37;1my\x1b[0m!"
             <<
             std::endl;
+    std::cout << "UDP-Socket Version" << std::endl;
     std::cout << "PLEASE DO \x1b[31;1mNOT\x1b[0m KILL THE PROGRAM WITH \x1b[31;1mCTRL + C\x1b[0m" <<
             std::endl;
     while (running) {
@@ -182,6 +184,8 @@ int main(const int argc, const char *argv[]) {
     VoiceChannelManager::join();
     std::cout << "> Websocket was stopped" << std::endl;
 
+
+    std::cout << "sended " << TransmissionManager::totalSendedPackages << "packages in total" << std::endl;
 
     std::cout << "> stopped successfully" << std::endl;
 

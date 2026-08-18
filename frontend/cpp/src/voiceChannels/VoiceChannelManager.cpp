@@ -3,10 +3,8 @@
 #include <iostream>
 #include <thread>
 #include <utility>
-#include <ixwebsocket/IXProgressCallback.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
-#include <ixwebsocket/IXWebSocketMessageType.h>
 #include <pulse/def.h>
 #include <pulse/error.h>
 #include <pulse/sample.h>
@@ -26,10 +24,10 @@ VoiceChannelManager::VoiceChannelManager() {
 
         pa_buffer_attr bufferAttr;
         bufferAttr.maxlength = static_cast<uint32_t>(-1);
-        bufferAttr.tlength = packageSize * sizeof(int16_t) * 2;
+        bufferAttr.tlength = packageSize;
         bufferAttr.prebuf = static_cast<uint32_t>(-1);
         bufferAttr.minreq = static_cast<uint32_t>(-1);
-        bufferAttr.fragsize = sizeof(int16_t);
+        bufferAttr.fragsize = packageSize;
 
 
         while (!stopThread) {
@@ -37,7 +35,6 @@ VoiceChannelManager::VoiceChannelManager() {
             if (stopThread) {
                 break;
             }
-            std::cout << "> Starting Websocket" << std::endl;
             mutex.lock();
 
             int paCaptureErrorCode;
@@ -48,7 +45,7 @@ VoiceChannelManager::VoiceChannelManager() {
                 fprintf(stderr, "AudioCapture failed: %s\n", pa_strerror(paCaptureErrorCode));
                 return 1;
             }
-            std::vector<int16_t> captureBuffer(packageSize);
+            std::vector<int8_t> captureBuffer(packageSize);
 
             int paPlaybackErrorCode;
             pa_simple *playbackStream = pa_simple_new(
@@ -88,16 +85,13 @@ VoiceChannelManager::VoiceChannelManager() {
 
 
                 /*capture audio*/
-                if (pa_simple_read(captureStream, captureBuffer.data(), captureBuffer.size() * sizeof(int16_t),
+                if (pa_simple_read(captureStream, captureBuffer.data(), captureBuffer.size() * sizeof(int8_t),
                                    &paCaptureErrorCode) < 0) {
                     fprintf(stderr, "pa_simple_read() failed: %s\n", pa_strerror(paCaptureErrorCode));
                     break;
                 }
-                const std::string payload{
-                    reinterpret_cast<const char *>(captureBuffer.data()),
-                    captureBuffer.size() * sizeof(int16_t)
-                };
-                TransmissionManager::instance->send(payload);
+                TransmissionManager::instance->send(reinterpret_cast<char *>(captureBuffer.data()),
+                                                    captureBuffer.size());
             }
 
             TransmissionManager::instance->disconnect();
@@ -107,7 +101,6 @@ VoiceChannelManager::VoiceChannelManager() {
 
             pa_simple_drain(playbackStream, &paCaptureErrorCode);
             pa_simple_free(playbackStream);
-            std::cout << "> Closed Websocket" << std::endl;
         }
         std::cout << "> VoiceChannelManager Thread stopped" << std::endl;
         return 0;

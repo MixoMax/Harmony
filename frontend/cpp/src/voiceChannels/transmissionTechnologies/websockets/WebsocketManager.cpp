@@ -46,7 +46,11 @@ void WebsocketManager::disconnect() {
     webSocket.close();
 }
 
-void WebsocketManager::send(const std::string payload) {
+void WebsocketManager::send(char *data, const size_t length) {
+    const std::string payload{
+        data,
+        length * sizeof(int8_t)
+    };
     if (!webSocket.sendBinary(payload).success) {
         std::cerr << "failed to send binaries" << std::endl;
     }

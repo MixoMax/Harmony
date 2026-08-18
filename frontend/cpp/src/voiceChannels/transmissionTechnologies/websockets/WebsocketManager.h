@@ -18,7 +18,7 @@ public:
 
     void disconnect() override;
 
-    void send(std::string payload) override;
+    void send(char *data, size_t length) override;
 };
 
 
