@@ -11,6 +11,7 @@
 #include "../../../settings.h"
 
 void UDPSocketManager::connect() {
+    TransmissionManager::connect();
     isConnected = true;
     udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (udpSocket < 0) {
@@ -28,8 +29,8 @@ void UDPSocketManager::connect() {
     }
 
     senderAddress.sin_family = AF_INET;
-    senderAddress.sin_port = htons(serverPort);
-    senderAddress.sin_addr.s_addr = inet_addr(serverURL.c_str());
+    senderAddress.sin_port = htons(otherPort);
+    senderAddress.sin_addr.s_addr = inet_addr(otherIPv4.c_str());
 
     senderAddressLength = sizeof(senderAddress);
 
@@ -47,19 +48,24 @@ void UDPSocketManager::connect() {
                 }
             } else {
                 /*receive data*/
-                const uint32_t sequenceNumber = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+                uint32_t sequenceNumberNetworkRepresentation;
+                memcpy(&sequenceNumberNetworkRepresentation, buffer, 4);
+                const uint32_t sequenceNumber = ntohl(sequenceNumberNetworkRepresentation);
                 if (sequenceNumber < receiveSequenceNumber) {
                     continue;
                 }
                 receiveSequenceNumber = sequenceNumber;
 
                 receiveCallback(buffer + 4, bytesRead - 4);
+                // std::cout << "> total receiving progress: " <<
+                //         static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
             }
         }
     });
 }
 
 void UDPSocketManager::disconnect() {
+    TransmissionManager::disconnect();
     isConnected = false;
 
     if (udpSocket >= 0) {
@@ -80,7 +86,8 @@ void UDPSocketManager::send(char *data, const size_t length) {
     ++sendSequenceNumber;
 
     char sendBuffer[4 + packageSize];
-    memcpy(sendBuffer, &sendSequenceNumber, 4); // hieran liegt es nicht
+    const uint32_t sequenceNumberNetworkRepresentation = htonl(sendSequenceNumber);
+    memcpy(sendBuffer, &sequenceNumberNetworkRepresentation, 4);
     memcpy(sendBuffer + 4, data, length);
 
     ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &senderAddress,

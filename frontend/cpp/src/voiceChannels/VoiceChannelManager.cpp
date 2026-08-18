@@ -45,7 +45,7 @@ VoiceChannelManager::VoiceChannelManager() {
                 fprintf(stderr, "AudioCapture failed: %s\n", pa_strerror(paCaptureErrorCode));
                 return 1;
             }
-            std::vector<int8_t> captureBuffer(packageSize);
+            int8_t captureBuffer[packageSize];
 
             int paPlaybackErrorCode;
             pa_simple *playbackStream = pa_simple_new(
@@ -74,24 +74,24 @@ VoiceChannelManager::VoiceChannelManager() {
 
             while (shouldConnect && !stopThread) {
                 if (!TransmissionManager::instance->isConnected && wasConnected) {
-                    //ws disconnected
+                    //TransmissionManager lost connection
                     break;
                 }
                 if (!TransmissionManager::instance->isConnected) {
-                    //ws connection not ready yet
+                    //TransmissionManager is not connected yet
                     continue;
                 }
                 wasConnected = true;
 
 
                 /*capture audio*/
-                if (pa_simple_read(captureStream, captureBuffer.data(), captureBuffer.size() * sizeof(int8_t),
+                if (pa_simple_read(captureStream, captureBuffer, packageSize * sizeof(int8_t),
                                    &paCaptureErrorCode) < 0) {
                     fprintf(stderr, "pa_simple_read() failed: %s\n", pa_strerror(paCaptureErrorCode));
                     break;
                 }
-                TransmissionManager::instance->send(reinterpret_cast<char *>(captureBuffer.data()),
-                                                    captureBuffer.size());
+                TransmissionManager::instance->send(reinterpret_cast<char *>(captureBuffer),
+                                                    packageSize);
             }
 
             TransmissionManager::instance->disconnect();
@@ -112,24 +112,31 @@ VoiceChannelManager &VoiceChannelManager::getInstance() {
     return instance;
 }
 
-void VoiceChannelManager::connect(std::string roomName, std::string userName, std::string micDeviceName,
-                                  std::string speakerDeviceName) {
+void VoiceChannelManager::connect(std::string roomName, std::string userName) {
     auto &instance = getInstance();
 
     instance.mutex.lock();
     instance.roomName = std::move(roomName);
     instance.userName = std::move(userName);
-    instance.micDeviceName = std::move(micDeviceName);
-    instance.speakerDeviceName = std::move(speakerDeviceName);
     instance.mutex.unlock();
     instance.shouldConnect = true;
     instance.shouldConnect.notify_all();
 }
 
 void VoiceChannelManager::disconnect() {
+    std::cout << "> VoiceChannelManager disconnecting..." << std::endl;
     auto &instance = getInstance();
 
     instance.shouldConnect = false;
+}
+
+void VoiceChannelManager::setDeviceNames(std::string micDeviceName, std::string speakerDeviceName) {
+    auto &instance = getInstance();
+
+    instance.mutex.lock();
+    instance.micDeviceName = std::move(micDeviceName);
+    instance.speakerDeviceName = std::move(speakerDeviceName);
+    instance.mutex.unlock();
 }
 
 void VoiceChannelManager::join() {

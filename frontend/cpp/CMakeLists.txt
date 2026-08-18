@@ -75,6 +75,12 @@ add_executable(Harmony
         src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.h
         src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.cpp
         src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.h
+        src/httpUtils/Client.cpp
+        src/httpUtils/Client.h
+        src/httpUtils/dataClasses/Room.cpp
+        src/httpUtils/dataClasses/Room.h
+        src/httpUtils/dataClasses/User.cpp
+        src/httpUtils/dataClasses/User.h
 )
 
 #include directories

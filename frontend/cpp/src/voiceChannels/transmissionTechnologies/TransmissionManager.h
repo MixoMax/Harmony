@@ -21,13 +21,14 @@ public:
 
     std::atomic_bool isConnected{false};
 
+    // Here you can select the transmission technology (UDP or Websockets)
     static TransmissionManager *instance;
 
     virtual ~TransmissionManager() = default;
 
     virtual void connect();
 
-    virtual void disconnect() = 0;
+    virtual void disconnect();
 
     virtual void send(char *data, size_t length) = 0;
 

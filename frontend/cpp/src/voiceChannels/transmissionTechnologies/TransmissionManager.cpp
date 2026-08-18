@@ -21,6 +21,10 @@ void TransmissionManager::connect() {
     std::cout << "> Starting TransmissionManager" << std::endl;
 }
 
+void TransmissionManager::disconnect() {
+    std::cout << "> Disconnecting TransmissionManager" << std::endl;
+}
+
 void TransmissionManager::setReceiveCallback(std::function<void(const char *data, int length)> callback) {
     this->receiveCallback = std::move(callback);
 }

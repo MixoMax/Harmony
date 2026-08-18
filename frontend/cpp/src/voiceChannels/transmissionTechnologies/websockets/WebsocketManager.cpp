@@ -14,7 +14,8 @@
 WebsocketManager::~WebsocketManager() = default;
 
 void WebsocketManager::connect() {
-    webSocket.setUrl("ws://" + serverURL + "/ws/" + roomName + "/" + userName);
+    TransmissionManager::connect();
+    webSocket.setUrl(wsServerURL + "/ws/" + roomName + "/" + userName);
     webSocket.setOnMessageCallback(
         [this](const ix::WebSocketMessagePtr &msg) {
             switch (msg->type) {
@@ -27,14 +28,16 @@ void WebsocketManager::connect() {
                     isConnected = false;
                     break;
                 case ix::WebSocketMessageType::Error:
-                    std::cout << "> !WS ERROR!: " << msg->errorInfo.reason << std::endl;
+                    std::cout << "> !WS!: " << msg->errorInfo.reason << std::endl;
                     break;
                 case ix::WebSocketMessageType::Message:
                     /*receiving audio*/
                     receiveCallback(msg->str.data(), msg->str.size());
                     break;
                 default:
-                    std::cout << "> Unknown message type: " << static_cast<int>(msg->type) << std::endl;
+                    std::cout << "> Unknown message type: " << static_cast<int>(msg->type) << " (\"" << msg->str <<
+                            "\")"
+                            << std::endl;
                     break;
             }
         });
@@ -43,6 +46,7 @@ void WebsocketManager::connect() {
 }
 
 void WebsocketManager::disconnect() {
+    TransmissionManager::disconnect();
     webSocket.close();
 }
 
@@ -52,6 +56,6 @@ void WebsocketManager::send(char *data, const size_t length) {
         length * sizeof(int8_t)
     };
     if (!webSocket.sendBinary(payload).success) {
-        std::cerr << "failed to send binaries" << std::endl;
+        std::cerr << "!WS!: failed to send binaries" << std::endl;
     }
 }

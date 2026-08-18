@@ -7,34 +7,56 @@ from fastapi.responses import FileResponse, JSONResponse
 app = FastAPI()
 
 
+class User:
+    def __init__(self, name: str, websocket: websockets.WebSocket):
+        self.name = name
+        self.websocket: websockets.WebSocket = websocket
+
+    def to_json(self):
+        return {"name": self.name, "ip": self.websocket.client.host, "port": self.websocket.client.port}
+
+
+class Room:
+    def __init__(self, name):
+        self.name = name
+        self.users: list[User] = []
+
+    def to_json(self):
+        return {"name": self.name, "users": [user.to_json() for user in self.users]}
+
+
 class WebSocketManager:
-    rooms: dict[str, list[tuple[websockets.WebSocket, str]]] = {}  # room_id: list of tuples (websocket, username)
+    rooms: dict[str, Room] = {}  # room_id: list of tuples (websocket, username)
 
     def __init__(self):
         self.rooms = {}
 
-    async def connect(self, websocket: websockets.WebSocket, room_id: str, username: str):
-        print(f"User {username} connected to room {room_id}")
+    async def connect(self, room_id: str, user: User) -> Room:
+        print(f"User \"{user.name}\" connected to room \"{room_id}\"")
         if room_id not in self.rooms:
-            self.rooms[room_id] = []
-        self.rooms[room_id].append((websocket, username))
-        await websocket.accept()
+            self.rooms[room_id] = Room(room_id)
 
-    async def disconnect(self, websocket: websockets.WebSocket, room_id: str):
-        if room_id in self.rooms:
-            self.rooms[room_id] = [(ws, user) for ws, user in self.rooms[room_id] if ws != websocket]
-            if not self.rooms[room_id]:  # If the room is empty, remove it
-                del self.rooms[room_id]
+        room: Room = self.rooms[room_id]
+        room.users.append(user)
 
-    async def broadcast_bytes(self, room_id: str, data: bytes, excluded_user: str | None = None):
-        if room_id in self.rooms:
-            for websocket, user in self.rooms[room_id]:
-                if user != excluded_user:
-                    print(f"sending {len(data)} bytes to {user} in room {room_id}")
-                    asyncio.create_task(websocket.send_bytes(data))
+        await user.websocket.accept()
+        return room
+
+    async def disconnect(self, room: Room, user: User):
+        print(f"User \"{user.name}\" disconnected from room \"{room.name}\"")
+        room.users = [u for u in room.users if u != user]
+        if not room.users:  # If the room is empty, remove it
+            del self.rooms[room.name]
+
+    async def broadcast_bytes(self, room: Room, data: bytes, excluded_user: User | None = None):
+        for user in room.users:
+            if user != excluded_user:
+                print(f"sending {len(data)} bytes to {user.name} in room {room.name}")
+                asyncio.create_task(user.websocket.send_bytes(data))
 
     def get_room_data(self):
-        return {room_id: [user for _, user in users] for room_id, users in self.rooms.items()}
+        print(self.rooms)
+        return [room.to_json() for room in self.rooms.values()]
 
 
 wsm = WebSocketManager()
@@ -47,13 +69,14 @@ async def get_rooms():
 
 @app.websocket("/ws/{room_id}/{username}")
 async def websocket_endpoint(websocket: websockets.WebSocket, room_id: str, username: str):
-    await wsm.connect(websocket, room_id, username)
+    user = User(username, websocket)
+    room: Room = await wsm.connect(room_id=room_id, user=user)
     try:
         while True:
             data = await websocket.receive_bytes()
-            await wsm.broadcast_bytes(room_id, data, excluded_user=username)
+            await wsm.broadcast_bytes(room=room, data=data, excluded_user=user)
     except websockets.WebSocketDisconnect:
-        await wsm.disconnect(websocket, room_id)
+        await wsm.disconnect(room=room, user=user)
 
 
 @app.get("/{path:path}")
