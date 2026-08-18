@@ -28,18 +28,14 @@ void UDPSocketManager::connect() {
         return;
     }
 
-    senderAddress.sin_family = AF_INET;
-    senderAddress.sin_port = htons(otherPort);
-    senderAddress.sin_addr.s_addr = inet_addr(otherIPv4.c_str());
-
-    senderAddressLength = sizeof(senderAddress);
-
 
     receiveThread = std::make_unique<std::thread>([this]() {
         char buffer[4 + packageSize];
         while (isConnected) {
-            int bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
-                                     reinterpret_cast<struct sockaddr *>(&senderAddress), &senderAddressLength);
+            sockaddr_in receiveAddress{};
+            socklen_t receiveAddressLength = sizeof(receiveAddress);
+            const int bytesRead = recvfrom(udpSocket, buffer, 4 + packageSize, 0,
+                                           reinterpret_cast<struct sockaddr *>(&receiveAddress), &receiveAddressLength);
             if (bytesRead < 0) {
                 if (isConnected) {
                     std::cerr << "Error receiving data" << strerror(errno) << std::endl;
@@ -47,14 +43,23 @@ void UDPSocketManager::connect() {
                     break;
                 }
             } else {
+                /*getting sender*/
+                char senderIp[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &receiveAddress.sin_addr, senderIp, INET_ADDRSTRLEN);
+                int senderPort = ntohs(receiveAddress.sin_port);
+                User &sender = *std::ranges::find_if(otherUsers,
+                                                     [senderIp, senderPort](const User &user) {
+                                                         return user.ip == senderIp && user.port == senderPort;
+                                                     });
+
                 /*receive data*/
                 uint32_t sequenceNumberNetworkRepresentation;
                 memcpy(&sequenceNumberNetworkRepresentation, buffer, 4);
                 const uint32_t sequenceNumber = ntohl(sequenceNumberNetworkRepresentation);
-                if (sequenceNumber < receiveSequenceNumber) {
+                if (sequenceNumber < sender.receiveSequenceNumber) {
                     continue;
                 }
-                receiveSequenceNumber = sequenceNumber;
+                sender.receiveSequenceNumber = sequenceNumber;
 
                 receiveCallback(buffer + 4, bytesRead - 4);
                 // std::cout << "> total receiving progress: " <<
@@ -73,7 +78,6 @@ void UDPSocketManager::disconnect() {
         close(udpSocket);
         udpSocket = -1;
     }
-    senderAddressLength = 0;
 
     if (receiveThread && receiveThread->joinable()) {
         receiveThread->join();
@@ -90,9 +94,16 @@ void UDPSocketManager::send(char *data, const size_t length) {
     memcpy(sendBuffer, &sequenceNumberNetworkRepresentation, 4);
     memcpy(sendBuffer + 4, data, length);
 
-    ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &senderAddress,
-                                senderAddressLength);
-    if (sendResult < 0) {
-        std::cerr << "Error sending data" << strerror(errno) << std::endl;
+
+    // auto t1 = std::chrono::high_resolution_clock::now();
+    for (const auto &user: otherUsers) {
+        const ssize_t sendResult = sendto(udpSocket, sendBuffer, 4 + packageSize, 0, (struct sockaddr *) &user.sockaddr,
+                                          sizeof(user.sockaddr));
+        if (sendResult < 0) {
+            std::cerr << "Error sending data" << strerror(errno) << std::endl;
+        }
     }
+    // auto t2 = std::chrono::high_resolution_clock::now();
+    // std::cout << "Sending took: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "ms" <<
+    //         std::endl;
 }

@@ -15,6 +15,7 @@
 
 TransmissionManager *TransmissionManager::instance = new UDPSocketManager();
 long TransmissionManager::totalSendedPackages = 0;
+std::vector<User> TransmissionManager::otherUsers{};
 
 
 void TransmissionManager::connect() {

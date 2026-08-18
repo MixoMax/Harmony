@@ -13,8 +13,7 @@
 class UDPSocketManager : public TransmissionManager {
     int udpSocket{0};
     sockaddr_in ownAddress{};
-    sockaddr_in senderAddress{};
-    socklen_t senderAddressLength{0};
+
 
     std::unique_ptr<std::thread> receiveThread{nullptr};
 

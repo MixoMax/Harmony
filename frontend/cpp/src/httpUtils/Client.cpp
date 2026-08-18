@@ -6,6 +6,7 @@
 #include "httplib.h"
 #include "../settings.h"
 #include "../voiceChannels/VoiceChannelManager.h"
+#include "../voiceChannels/transmissionTechnologies/TransmissionManager.h"
 #include "dataClasses/Room.h"
 
 ix::WebSocket Client::roomWebsocket{};
@@ -26,7 +27,7 @@ std::vector<Room> Client::getRooms() {
 
 void Client::connectToRoom(const std::string &roomName, const std::string &username) {
     std::cout << "> Client tries to connect to room: \"" << roomName << "\"..." << std::endl;
-    roomWebsocket.setUrl(wsServerURL + "/ws/" + roomName + "/" + username);
+    roomWebsocket.setUrl(wsServerURL + "/ws/" + roomName + "/" + username + "/" + std::to_string(ownPort));
     roomWebsocket.setOnMessageCallback(
         [roomName, username](const ix::WebSocketMessagePtr &msg) {
             switch (msg->type) {
@@ -44,23 +45,56 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                     std::cout << "> !WS!: " << msg->errorInfo.reason << std::endl;
                     std::cout << "> ";
                     break;
-                case ix::WebSocketMessageType::Message:
+                case ix::WebSocketMessageType::Message: {
                     /*receiving connects & disconnects*/
-                    std::cout << msg->str << std::endl;
-                    std::cout << "> ";
+                    json j = json::parse(msg->str);
+                    if (j["type"] == "user_joined") {
+                        TransmissionManager::otherUsers.emplace_back(j["user"]);
+                        std::cout << "> User joined: " << j["user"]["name"] << std::endl;
+                    } else if (j["type"] == "user_left") {
+                        const User user{j["user"]};
+                        std::erase_if(TransmissionManager::otherUsers,
+                                      [&](const User &other) {
+                                          return user.id == other.id;
+                                      });
+                        std::cout << "> User left: " << user.name << std::endl;
+                    } else if (j["type"] == "room_joined") {
+                        const Room room{j["room"]};
+                        TransmissionManager::otherUsers = room.users;
+                        std::cout << "> Room joined: " << room.name << std::endl;
+                        if (room.users.empty()) {
+                            std::cout << "> No users in room" << std::endl;
+                        } else {
+                            std::cout << "> Say hello to ";
+                            for (int userIndex = 0; userIndex < room.users.size(); ++userIndex) {
+                                std::cout << "\x1b[35;1m" << room.users[userIndex].name << "\x1b[0m";
+                                if (userIndex < room.users.size() - 1) {
+                                    std::cout << ", ";
+                                }
+                            }
+                            std::cout << std::endl;
+                        }
+                    } else {
+                        std::cout << "> Unknown message type: " << j["type"] << " (\"" << msg->str << "\")" <<
+                                std::endl;
+                    }
                     break;
-                case ix::WebSocketMessageType::Ping:
+                }
+                case ix::WebSocketMessageType::Ping: {
                     std::cout << "> Ping received" << std::endl;
                     break;
-                case ix::WebSocketMessageType::Pong:
+                }
+                case ix::WebSocketMessageType::Pong: {
                     std::cout << "> Pong received" << std::endl;
                     break;
-                default:
+                }
+                default: {
                     std::cout << "> Unknown message type: " << static_cast<int>(msg->type) << " (\"" << msg->str <<
                             "\")"
                             << std::endl;
                     std::cout << "> ";
                     break;
+                }
             }
         });
     roomWebsocket.disableAutomaticReconnection();

@@ -8,6 +8,8 @@
 #include <string>
 #include <functional>
 
+#include "../../httpUtils/dataClasses/User.h"
+
 
 class TransmissionManager {
 protected:
@@ -16,6 +18,7 @@ protected:
 public:
     std::string roomName;
     std::string userName;
+    static std::vector<User> otherUsers;
 
     static long totalSendedPackages;
 
