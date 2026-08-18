@@ -115,11 +115,11 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                     break;
                 }
                 case ix::WebSocketMessageType::Ping: {
-                    std::cout << "> Ping received" << std::endl;
+                    // std::cout << "> Ping received" << std::endl;
                     break;
                 }
                 case ix::WebSocketMessageType::Pong: {
-                    std::cout << "> Pong received" << std::endl;
+                    // std::cout << "> Pong received" << std::endl;
                     break;
                 }
                 default: {
