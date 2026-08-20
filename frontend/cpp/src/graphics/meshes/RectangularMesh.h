@@ -4,7 +4,7 @@
 
 #ifndef HARMONY_RECANGULARMESH_H
 #define HARMONY_RECANGULARMESH_H
-#include "mesh.h"
+#include "../../../BasicCppLibrary/visuals/mesh.h"
 
 
 class RectangularMesh : public Mesh {

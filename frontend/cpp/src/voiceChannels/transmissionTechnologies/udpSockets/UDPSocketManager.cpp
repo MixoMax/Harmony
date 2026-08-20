@@ -24,7 +24,7 @@ void UDPSocketManager::connect() {
             const ssize_t bytesRead = recvfrom(Client::udpSocket, buffer, 4 + packageSize, 0,
                                                reinterpret_cast<sockaddr *>(&receiveAddress),
                                                &receiveAddressLength);
-            // std::cout << "> received " << bytesRead << " bytes" << std::endl;
+            std::cout << "> received " << bytesRead << " bytes" << std::endl;
 
             if (bytesRead < 4) {
                 if (isConnected) {
@@ -52,8 +52,8 @@ void UDPSocketManager::connect() {
                 sender.receiveSequenceNumber = sequenceNumber;
 
                 receiveCallback(buffer + 4, bytesRead - 4);
-                // std::cout << "> total receiving progress: " <<
-                //         static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
+                std::cout << "> total receiving progress: " <<
+                        static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
             }
         }
     });
@@ -83,6 +83,8 @@ void UDPSocketManager::send(char *data, const size_t length) {
     const uint32_t sequenceNumberNetworkRepresentation = htonl(sendSequenceNumber);
     memcpy(sendBuffer, &sequenceNumberNetworkRepresentation, 4);
     memcpy(sendBuffer + 4, data, length);
+
+    /*ifft*/
 
 
     // auto t1 = std::chrono::high_resolution_clock::now();

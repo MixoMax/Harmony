@@ -6,12 +6,12 @@
 #define HARMONY_CHARACTERMANAGER_H
 #include <map>
 
-#include "../../../BasicCppMathLibrary/vectors/ivec2.h"
-#include "../../../BasicCppMathLibrary/vectors/vec3.h"
-#include "../../../BasicCppMathLibrary/vectors/vec4.h"
+#include "../../../BasicCppLibrary/vectors/ivec2.h"
+#include "../../../BasicCppLibrary/vectors/vec3.h"
+#include "../../../BasicCppLibrary/vectors/vec4.h"
+#include "../../../BasicCppLibrary/graphics.h"
+#include "../../../BasicCppLibrary/visuals/shader.h"
 #include "../../supporters/Alignment.h"
-#include "../meshes/RectangularMesh.h"
-#include "../shaders/shader.h"
 
 struct Character {
     GLuint textureID;

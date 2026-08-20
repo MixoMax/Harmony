@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 message("Running Setup for Harmony")
 
 
-find_package(OpenGL REQUIRED)
+#find_package(OpenGL REQUIRED)
 
 # audio
 find_package(PkgConfig REQUIRED)
@@ -26,7 +26,7 @@ set(USE_TLS ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(ixwebsocket)
 
 #fonts
-find_package(Freetype REQUIRED)
+#find_package(Freetype REQUIRED)
 
 
 if (MINGW)
@@ -36,39 +36,36 @@ endif ()
 
 
 add_executable(Harmony
-        poc/Terminal.cpp
-        #        src/main.cpp
-        #        src/glad.c
+        #        poc/Terminal.cpp
+        src/main.cpp
+        src/glad.c
+        src/settings.h
         src/voiceChannels/VoiceChannelManager.cpp
         src/voiceChannels/VoiceChannelManager.h
-        src/settings.h
         src/voiceChannels/PulseAudioDeviceEnumeration.h
-        #        src/graphics/GraphicsManager.cpp
-        #        src/graphics/GraphicsManager.h
-        #        src/graphics/meshes/mesh.cpp
-        #        src/graphics/meshes/mesh.h
-        #        src/graphics/meshes/RectangularMesh.cpp
-        #        src/graphics/meshes/RectangularMesh.h
-        #        src/graphics/shaders/shader.cpp
-        #        src/supporters/fileWizard.h
-        #        src/supporters/fileWizard.cpp
-        #        src/supporters/stb_image_impl.cpp
-        #        src/graphics/basicShapes/Rectangle.cpp
-        #        src/graphics/basicShapes/Rectangle.h
-        #        src/supporters/SDF.h
-        #        src/graphics/widgets/FilledButton.cpp
-        #        src/graphics/widgets/FilledButton.h
-        #        src/graphics/widgets/Widget.cpp
-        #        src/graphics/widgets/Widget.h
-        #        src/graphics/meshes/MeshInitializer.h
-        #        src/graphics/shaders/ShaderInitializer.h
-        #        src/supporters/InputManager.cpp
-        #        src/supporters/InputManager.h
-        #        src/supporters/interpolation.h
-        #        src/graphics/text/CharacterManager.cpp
-        #        src/graphics/text/CharacterManager.h
-        #        src/supporters/Alignment.h
-        #        src/supporters/Alignment.cpp
+        src/graphics/GraphicsManager.cpp
+        src/graphics/GraphicsManager.h
+        src/supporters/fileWizard.h
+        src/supporters/fileWizard.cpp
+        src/supporters/stb_image_impl.cpp
+        src/graphics/basicShapes/Rectangle.cpp
+        src/graphics/basicShapes/Rectangle.h
+        src/supporters/SDF.h
+        src/graphics/widgets/FilledButton.cpp
+        src/graphics/widgets/FilledButton.h
+        src/graphics/widgets/Widget.cpp
+        src/graphics/widgets/Widget.h
+        src/graphics/meshes/RectangularMesh.cpp
+        src/graphics/meshes/RectangularMesh.h
+        src/graphics/meshes/MeshInitializer.h
+        src/graphics/shaders/ShaderInitializer.h
+        src/supporters/InputManager.cpp
+        src/supporters/InputManager.h
+        src/supporters/interpolation.h
+        src/graphics/text/CharacterManager.cpp
+        src/graphics/text/CharacterManager.h
+        src/supporters/Alignment.h
+        src/supporters/Alignment.cpp
         src/voiceChannels/transmissionTechnologies/TransmissionManager.cpp
         src/voiceChannels/transmissionTechnologies/TransmissionManager.h
         src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.cpp
@@ -81,6 +78,10 @@ add_executable(Harmony
         src/httpUtils/dataClasses/Room.h
         src/httpUtils/dataClasses/User.cpp
         src/httpUtils/dataClasses/User.h
+        src/graphics/pages/Homepage.cpp
+        src/graphics/pages/Homepage.h
+        src/graphics/pages/Page.cpp
+        src/graphics/pages/Page.h
 )
 
 #include directories
@@ -94,15 +95,15 @@ target_include_directories(Harmony PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/librarie
 target_include_directories(Harmony PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/libraries/lib")
 target_include_directories(Harmony PRIVATE ${PULSE_INCLUDE_DIRS})
 
-#add_subdirectory(BasicCppMathLibrary)
+add_subdirectory(BasicCppLibrary)
 
 target_link_libraries(Harmony
-        ${glfwName}
-        OpenGL::GL
+        #        ${glfwName}
+        #        OpenGL::GL
         ${PULSE_LIBRARIES}
         ixwebsocket
-        #        BasicCppMathLibrary
-        Freetype::Freetype
+        BasicCppLibrary
+        #        Freetype::Freetype
 )
 
 # Resource Files

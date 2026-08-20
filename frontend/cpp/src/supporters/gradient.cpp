@@ -1,6 +1,6 @@
 #include "gradient.h"
 
-#include "../BasicCppMathLibrary/customMath.h"
+#include "../BasicCppLibrary/customMath.h"
 
 vec4 Gradient::getColor(float t) {
     for (size_t i = 0; i < values.size(); i++)

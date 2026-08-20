@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "pages/Page.h"
+
 class GraphicsManager {
     static GraphicsManager *instance;
 
@@ -23,10 +25,13 @@ class GraphicsManager {
 public:
     GLFWwindow *window = nullptr;
     double mouseX, mouseY;
+    Page *currentPage = nullptr;
 
     static GraphicsManager &getInstance();
 
     static GraphicsManager *init();
+
+    [[nodiscard]] static GLFWwindow *getWindow();
 
     [[nodiscard]] double getScreenRatio() const;
 

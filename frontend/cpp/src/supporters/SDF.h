@@ -7,7 +7,7 @@
 #define HARMONY_SDF_H
 #include <algorithm>
 
-#include "../../BasicCppMathLibrary/vectors/vec2.h"
+#include "../../BasicCppLibrary/vectors/vec2.h"
 
 [[nodiscard]] inline float sdBox(const vec2 &uv, const float width, const float height) {
     const vec2 d = uv.abs() - vec2(width, height);

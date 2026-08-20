@@ -3,10 +3,9 @@
 //
 
 #include "Rectangle.h"
-#include <cmath>
-#include <iostream>
 
 #include "../GraphicsManager.h"
+#include "../../../BasicCppLibrary/vectors/vec2.h"
 #include "../../supporters/SDF.h"
 
 Rectangle::Rectangle(const float x, const float y, const float width, const float height, const float radius,

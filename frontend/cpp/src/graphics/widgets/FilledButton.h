@@ -7,17 +7,21 @@
 #include <functional>
 
 #include "Widget.h"
-#include "../../../BasicCppMathLibrary/vectors/vec3.h"
-#include "../../../BasicCppMathLibrary/vectors/vec4.h"
+#include "../../../BasicCppLibrary/vectors/vec3.h"
+#include "../../../BasicCppLibrary/vectors/vec4.h"
+#include "../../../BasicCppLibrary/visuals/shader.h"
 #include "../../supporters/InputManager.h"
 #include "../basicShapes/Rectangle.h"
-#include "../shaders/shader.h"
 
 
 class FilledButton : public Widget {
     Rectangle rectangle{};
     vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.f);
     size_t onPressedId = -1;
+
+
+    double lastClickTime = -99999.0;
+    vec2 lastClickPosition{};
 
     static Shader *shader;
 
@@ -34,6 +38,10 @@ public:
 
     void setPosition(float x, float y);
 
+    [[nodiscard]] vec2 getPosition() const;
+
+    [[nodiscard]] float getY() const;
+
     void setRotation(float rotation);
 
     void setRadius(float radius);
@@ -43,7 +51,7 @@ public:
     void deleteOnPressed();
 
 
-    void draw() const;
+    void draw(GLFWwindow *window);
 
     static void initializeShaders();
 

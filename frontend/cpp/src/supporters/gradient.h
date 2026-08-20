@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "../BasicCppMathLibrary/vectors/vec4.h"
+#include "../BasicCppLibrary/vectors/vec4.h"
 
 class Gradient{
 public:

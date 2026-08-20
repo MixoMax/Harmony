@@ -47,6 +47,10 @@ std::vector<Room> Client::getRooms() {
     httplib::Client cli(serverURL);
     httplib::Result res = cli.Get("/api/v1/rooms");
     if (res) {
+        if (res->status != 200) {
+            std::cerr << "Error getting rooms: " << res->status << std::endl;
+            return {};
+        }
         json j = json::parse(res->body);
         std::vector<Room> rooms;
         for (auto &room: j) {

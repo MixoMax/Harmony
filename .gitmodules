@@ -1,3 +1,3 @@
-[submodule "frontend/cpp/BasicCppMathLibrary"]
-	path = frontend/cpp/BasicCppMathLibrary
-	url = https://github.com/Ozeankueste3601/BasicCppMathLibrary
+[submodule "frontend/cpp/BasicCppLibrary"]
+	path = frontend/cpp/BasicCppLibrary
+	url = https://github.com/Ozeankueste3601/BasicCppLibrary
