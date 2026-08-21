@@ -12,6 +12,7 @@
 #include "../../httpUtils/Client.h"
 #include "../../httpUtils/dataClasses/Room.h"
 #include "../widgets/FilledButton.h"
+#include "../widgets/TextButton.h"
 
 
 class Homepage : public Page {
@@ -20,15 +21,15 @@ class Homepage : public Page {
     std::vector<Room> rooms = Client::getRooms();
     std::vector<FilledButton> roomButtons{};
 
-    FilledButton refreshButton{};
-    FilledButton exitButton{};
+    TextButton refreshButton{};
+    TextButton exitButton{};
 
     static constexpr float buttonHeight = 300;
     static constexpr float spaceBetweenButtons = buttonHeight * 2 + 20;
     float totalNeededHeight = (rooms.size() - 1) * spaceBetweenButtons;
 
     const Font defaultFont{
-        .family = "Roboto", .scale = .2f, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center
+        .family = "Roboto", .size = 2, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center
     };
 
 public:

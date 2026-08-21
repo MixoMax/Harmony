@@ -24,6 +24,7 @@ Homepage::Homepage() {
         Client::disconnectFromRoom();
         // }
     });
+    exitButton.text = "exit";
 
 
     refreshButton.setSize(500, 200);
@@ -37,6 +38,7 @@ Homepage::Homepage() {
             reloadRooms();
             // }
         });
+    refreshButton.text = "refresh";
 }
 
 Homepage::~Homepage() {
@@ -67,7 +69,7 @@ void Homepage::draw() {
 
         auto &roomButton = roomButtons[roomIndex];
 
-        roomButton.draw(GraphicsManager::getWindow());
+        roomButton.draw();
 
         CharacterManager::drawText(text, defaultFont, 0, roomButton.getY());
     }
@@ -76,14 +78,12 @@ void Homepage::draw() {
     //Exit
     const float exitButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10 + 430;
     exitButton.setPosition(-getScreenWidth() + 500, exitButtonY);
-    exitButton.draw(GraphicsManager::getWindow());
-    CharacterManager::drawText("exit", defaultFont, -getScreenWidth() + 500, exitButtonY);
+    exitButton.draw();
 
     //Refresh
     const float refreshButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10;
     refreshButton.setPosition(-getScreenWidth() + 500, refreshButtonY);
-    refreshButton.draw(GraphicsManager::getWindow());
-    CharacterManager::drawText("refresh", defaultFont, -getScreenWidth() + 500, refreshButtonY);
+    refreshButton.draw();
 }
 
 

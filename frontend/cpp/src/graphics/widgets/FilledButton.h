@@ -40,6 +40,8 @@ public:
 
     [[nodiscard]] vec2 getPosition() const;
 
+    [[nodiscard]] float getX() const;
+
     [[nodiscard]] float getY() const;
 
     void setRotation(float rotation);
@@ -51,7 +53,7 @@ public:
     void deleteOnPressed();
 
 
-    void draw(GLFWwindow *window);
+    void draw();
 
     static void initializeShaders();
 

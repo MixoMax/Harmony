@@ -143,7 +143,7 @@ void GraphicsManager::start() {
 
 
     const Font fpsFont{
-        .family = "Roboto", .scale = .1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
+        .family = "Roboto", .size = 1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
     };
 
     double lastUpdate = glfwGetTime();

@@ -34,6 +34,10 @@ vec2 FilledButton::getPosition() const {
     return {rectangle.x, rectangle.y};
 }
 
+float FilledButton::getX() const {
+    return rectangle.x;
+}
+
 float FilledButton::getY() const {
     return rectangle.y;
 }
@@ -67,13 +71,14 @@ void FilledButton::deleteOnPressed() {
     }
 }
 
-void FilledButton::draw(GLFWwindow *window) {
+void FilledButton::draw() {
     if (const RectangularMesh *mesh = RectangularMesh::getInstance(); mesh != nullptr) {
         shader->useShader();
         const auto &graphicsManager = GraphicsManager::getInstance();
         if (rectangle.isHovered(
                 static_cast<float>(graphicsManager.mouseX),
-                static_cast<float>(graphicsManager.mouseY)) && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) ==
+                static_cast<float>(graphicsManager.mouseY)) && glfwGetMouseButton(
+                GraphicsManager::getWindow(), GLFW_MOUSE_BUTTON_LEFT) ==
             GLFW_PRESS) {
             glUniform1i(shader->getUniform("uClick"), 1);
             lastClickTime = glfwGetTime();
