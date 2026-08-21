@@ -27,8 +27,6 @@ void InputManager::initializeInputManager() {
                        });
 
     glfwSetMouseButtonCallback(window, [](GLFWwindow *w, const int button, const int action, const int mods) {
-        std::cout << "in Callback" << std::endl;
-        std::cout << mouseButtonCallbacks.size() << std::endl;
         for (auto &[id, callback]: mouseButtonCallbacks) {
             callback(w, button, action, mods);
         }
