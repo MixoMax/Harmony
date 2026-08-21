@@ -8,13 +8,13 @@
 #include FT_FREETYPE_H
 
 #include "../settings.h"
+#include "../../BasicCppLibrary/text/CharacterManager.h"
 #include "../httpUtils/Client.h"
 #include "../supporters/InputManager.h"
 #include "../supporters/interpolation.h"
 #include "meshes/MeshInitializer.h"
 #include "pages/Homepage.h"
 #include "shaders/ShaderInitializer.h"
-#include "text/CharacterManager.h"
 
 GraphicsManager *GraphicsManager::instance = nullptr;
 
@@ -76,6 +76,8 @@ void GraphicsManager::setScreenSize(const int width, const int height) {
     screenHeight = height;
     screenRatio = static_cast<double>(screenWidth) / screenHeight;
     glViewport(0, 0, screenWidth, screenHeight);
+
+    CharacterManager::updateScreenSize(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
 }
 
 GraphicsManager::GraphicsManager() : screenWidth(100), screenHeight(100), screenRatio(1), mouseX(0), mouseY(0) {
@@ -137,8 +139,12 @@ void GraphicsManager::start() {
     InputManager::initializeInputManager();
     initializeMeshes();
     initializeShaders();
-    CharacterManager::initializeCharacterManager();
+    CharacterManager::initializeCharacterManager(fontQualityInPixel, {{"Roboto", "res/fonts/Roboto-Regular.ttf"}});
 
+
+    const Font fpsFont{
+        .family = "Roboto", .scale = .1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
+    };
 
     double lastUpdate = glfwGetTime();
 
@@ -157,11 +163,8 @@ void GraphicsManager::start() {
 
         /*FPS counter*/
         const double now = glfwGetTime();
-        CharacterManager::drawText(std::to_string(static_cast<int>(std::round(1 / (now - lastUpdate)))),
-                                   -static_cast<float>(screenWidth), static_cast<float>(screenHeight),
-                                   .1, 0,
-                                   vec4(1, 1, 1, 1),
-                                   Alignment::TopLeft);
+        CharacterManager::drawText(std::to_string(static_cast<int>(std::round(1 / (now - lastUpdate)))), fpsFont,
+                                   -static_cast<float>(getScreenWidth()), static_cast<float>(getScreenHeight()));
         lastUpdate = now;
 
         glfwSwapBuffers(window);

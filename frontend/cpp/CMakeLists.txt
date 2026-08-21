@@ -62,8 +62,6 @@ add_executable(Harmony
         src/supporters/InputManager.cpp
         src/supporters/InputManager.h
         src/supporters/interpolation.h
-        src/graphics/text/CharacterManager.cpp
-        src/graphics/text/CharacterManager.h
         src/supporters/Alignment.h
         src/supporters/Alignment.cpp
         src/voiceChannels/transmissionTechnologies/TransmissionManager.cpp

@@ -6,9 +6,9 @@
 
 #include "../GraphicsManager.h"
 #include "../../../BasicCppLibrary/supporters/interpolation.h"
+#include "../../../BasicCppLibrary/text/CharacterManager.h"
 #include "../../httpUtils/Client.h"
 #include "../meshes/RectangularMesh.h"
-#include "../text/CharacterManager.h"
 #include "../widgets/FilledButton.h"
 
 Homepage::Homepage() {
@@ -69,8 +69,7 @@ void Homepage::draw() {
 
         roomButton.draw(GraphicsManager::getWindow());
 
-        CharacterManager::drawText(text, 0, roomButton.getY(), .2, 0, vec4(1, 1, 1, 1),
-                                   Alignment::Center);
+        CharacterManager::drawText(text, defaultFont, 0, roomButton.getY());
     }
 
 
@@ -78,16 +77,13 @@ void Homepage::draw() {
     const float exitButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10 + 430;
     exitButton.setPosition(-getScreenWidth() + 500, exitButtonY);
     exitButton.draw(GraphicsManager::getWindow());
-    CharacterManager::drawText("exit", -getScreenWidth() + 500, exitButtonY, .2, 0, vec4(1, 1, 1, 1),
-                               Alignment::Center);
-
+    CharacterManager::drawText("exit", defaultFont, -getScreenWidth() + 500, exitButtonY);
 
     //Refresh
     const float refreshButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10;
     refreshButton.setPosition(-getScreenWidth() + 500, refreshButtonY);
     refreshButton.draw(GraphicsManager::getWindow());
-    CharacterManager::drawText("refresh", -getScreenWidth() + 500, refreshButtonY, .2, 0, vec4(1, 1, 1, 1),
-                               Alignment::Center);
+    CharacterManager::drawText("refresh", defaultFont, -getScreenWidth() + 500, refreshButtonY);
 }
 
 
