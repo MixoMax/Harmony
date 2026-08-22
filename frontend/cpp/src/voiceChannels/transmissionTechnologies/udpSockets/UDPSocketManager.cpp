@@ -11,6 +11,7 @@
 
 #include "../../../settings.h"
 #include "../../../httpUtils/Client.h"
+#include "../../graphics/AudioVisualizer.h"
 
 void UDPSocketManager::connect() {
     if (isConnected) {
@@ -139,11 +140,45 @@ void UDPSocketManager::send(int16_t *data, const size_t length) {
     ++totalSendedPackages;
     ++sendSequenceNumber;
 
+    const size_t sampleCount = length / 2;
+
+    std::vector<Complex> x;
+    x.resize(sampleCount);
+    for (size_t i = 0; i < sampleCount; ++i) {
+        x[i] = Complex(data[i]);
+    }
+
+    fft_inplace(x, false);
+
+    for (size_t i = 0; i < sampleCount; ++i) {
+        if (std::abs(x[i]) < 1000.0f) {
+            // Adjust this threshold for your noise floor
+            x[i] = 0.0f;
+        }
+    }
+
+    fft_inplace(x, true);
+
+
+    std::vector<int16_t> outputBuffer{};
+    for (size_t i = 0; i < sampleCount; ++i) {
+        // Grab the real part, clamp it to protect against clipping overflows
+        float realVal = x[i].real();
+
+        if (realVal > 32767.0f) realVal = 32767.0f;
+        if (realVal < -32768.0f) realVal = -32768.0f;
+
+        outputBuffer.emplace_back(static_cast<int16_t>(std::round(realVal)));
+    }
+
+
+    AudioVisualizer::audioData.store(std::make_shared<std::vector<int16_t> >(outputBuffer));
+
 
     char sendBuffer[4 + packageSize];
     const uint32_t sequenceNumberNetworkRepresentation = htonl(sendSequenceNumber);
     memcpy(sendBuffer, &sequenceNumberNetworkRepresentation, 4);
-    memcpy(sendBuffer + 4, data, length);
+    memcpy(sendBuffer + 4, outputBuffer.data(), length);
 
     /*ifft*/
 

@@ -94,11 +94,7 @@ VoiceChannelManager::VoiceChannelManager() {
                     fprintf(stderr, "pa_simple_read() failed: %s\n", pa_strerror(paCaptureErrorCode));
                     break;
                 }
-                AudioVisualizer::audioData.load().reset();
-                AudioVisualizer::audioData.store(std::make_shared<std::vector<int16_t> >());
-                for (int16_t &i: captureBuffer) {
-                    AudioVisualizer::audioData.load()->emplace_back(i);
-                }
+
                 TransmissionManager::instance->send(captureBuffer, packageSize);
             }
 
