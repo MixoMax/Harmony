@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mesh — p2p meetings</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ JOIN SCREEN ============ -->
+<section id="join-screen" class="screen">
+  <div class="join-card">
+    <div class="brand">
+      <span class="brand-mark">◇</span>
+      <span class="brand-name">mesh</span>
+    </div>
+    <p class="brand-sub">peer-to-peer video. end-to-end encrypted. no server in the middle.</p>
+
+    <label class="field">
+      <span>your name</span>
+      <input id="display-name" type="text" placeholder="Ada Lovelace" autocomplete="off" />
+    </label>
+
+    <label class="field">
+      <span>meeting code</span>
+      <input id="meeting-code" type="text" placeholder="leave blank to start a new meeting" autocomplete="off" />
+    </label>
+
+    <button id="join-btn" class="btn-primary">join / create meeting</button>
+    <p id="join-error" class="error-text" hidden></p>
+
+    <div class="key-status">
+      <span id="key-status-dot" class="dot dot-pending"></span>
+      <span id="key-status-text">generating RSA identity keypair…</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEETING SCREEN ============ -->
+<section id="meeting-screen" class="screen" hidden>
+  <header class="meeting-bar">
+    <div class="meeting-bar-left">
+      <span class="brand-mark small">◇</span>
+      <span id="meeting-code-label" class="mono"></span>
+      <button id="copy-link-btn" class="chip-btn" title="copy invite link">copy link</button>
+    </div>
+    <div class="meeting-bar-right">
+      <span id="participant-count" class="mono muted"></span>
+    </div>
+  </header>
+
+  <div id="video-grid" class="video-grid"></div>
+
+  <footer class="control-bar">
+    <button id="toggle-mic" class="control-btn" data-active="true" title="toggle microphone">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+    </button>
+    <button id="toggle-cam" class="control-btn" data-active="true" title="toggle camera">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11z"/></svg>
+    </button>
+    <button id="leave-btn" class="control-btn control-btn-danger" title="leave meeting">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.7 14.4a1.003 1.003 0 0 1 0-1.42C3.98 9.83 7.79 8 12 8s8.02 1.83 11.3 4.98c.19.18.3.43.3.71 0 .28-.11.53-.29.71l-1.77 1.77c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28a11.4 11.4 0 0 0-2.66-1.85.994.994 0 0 1-.56-.9v-3.1A16.9 16.9 0 0 0 12 9z"/></svg>
+    </button>
+  </footer>
+</section>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
