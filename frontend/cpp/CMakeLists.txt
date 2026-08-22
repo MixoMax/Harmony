@@ -82,6 +82,8 @@ add_executable(Harmony
         src/graphics/pages/Page.h
         src/graphics/widgets/TextButton.cpp
         src/graphics/widgets/TextButton.h
+        src/voiceChannels/graphics/AudioVisualizer.cpp
+        src/voiceChannels/graphics/AudioVisualizer.h
 )
 
 #include directories

@@ -137,10 +137,7 @@ void GraphicsManager::start() {
     InputManager::initializeInputManager();
     initializeMeshes();
     initializeShaders();
-    CharacterManager::initializeCharacterManager(fontQualityInPixel, {
-                                                     {"Roboto", "res/fonts/Roboto-Regular.ttf"},
-                                                     {"Cause", "res/fonts/Cause-Regular.ttf"}
-                                                 });
+    CharacterManager::initializeCharacterManager(fontQualityInPixel, fontFamilies);
 
 
     const Font fpsFont{

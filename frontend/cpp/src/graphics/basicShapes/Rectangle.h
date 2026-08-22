@@ -8,15 +8,10 @@
 
 class Rectangle {
 public:
-    float x, y;
-    float width, height;
-    float borderRadius;
-    float rotation;
-
-    Rectangle() : x(0), y(0), width(1), height(1), borderRadius(0), rotation(0) {
-    }
-
-    Rectangle(float x, float y, float width, float height, float borderRadius, float rotation);
+    float x = 0, y = 0;
+    float width = 1, height = 1;
+    float borderRadius = 0;
+    float rotation = 0;
 
     [[nodiscard]] bool isHovered(float mouseX, float mouseY) const;
 

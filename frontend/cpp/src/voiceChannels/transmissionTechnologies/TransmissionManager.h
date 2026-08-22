@@ -33,7 +33,7 @@ public:
 
     virtual void disconnect();
 
-    virtual void send(char *data, size_t length) = 0;
+    virtual void send(int16_t *data, size_t length) = 0;
 
     void setReceiveCallback(std::function<void(const char *data, int length)> callback);
 

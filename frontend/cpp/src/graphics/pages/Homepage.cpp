@@ -47,22 +47,8 @@ void Homepage::draw() {
 
 
     //Rooms
-    for (int roomIndex = 0; roomIndex < roomButtons.size(); roomIndex++) {
-        const Room &room = rooms[roomIndex];
-        std::string text = room.name + '(';
-        for (int userIndex = 0; userIndex < room.users.size(); userIndex++) {
-            const User &user = room.users[userIndex];
-            text += user.name;
-            if (userIndex < room.users.size() - 1)
-                text += ", ";
-        }
-        text += ')';
-
-        auto &roomButton = roomButtons[roomIndex];
-
+    for (auto &roomButton: roomButtons) {
         roomButton.draw();
-
-        CharacterManager::drawText(text, defaultFont, 0, roomButton.getY());
     }
 
 
@@ -75,6 +61,9 @@ void Homepage::draw() {
     const float refreshButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10;
     refreshButton.setPosition(500.f - getScreenWidth(), refreshButtonY);
     refreshButton.draw();
+
+
+    audioVisualizer.draw();
 }
 
 
@@ -86,17 +75,25 @@ void Homepage::reloadRooms() {
         const float buttonY = -roomIndex * spaceBetweenButtons + totalNeededHeight / 2;
 
         roomButtons.emplace_back();
-        FilledButton &roomButton = roomButtons.back();
-        roomButton.setSize(1400, buttonHeight);
+        TextButton &roomButton = roomButtons.back();
         roomButton.setPosition(0, buttonY);
-        roomButton.setColor(vec4(0.8353, 0.0784, 0.7882, 1));
         roomButton.setBorderRadius(100);
-        roomButton.setRotation(0);
         roomButton.setOnPressed([&room](GLFWwindow *window, const int button, const int action, const int mods) {
-            // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-            std::cout << "Test" << std::endl;
-            Client::connectToRoom(room.name, "maxmustermann");
-            // }
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+                std::cout << "Pressed on connect with room " << room.name << std::endl;
+                Client::connectToRoom(room.name, "maxmustermann");
+            }
         });
+
+
+        std::string text = room.name + '(';
+        for (int userIndex = 0; userIndex < room.users.size(); userIndex++) {
+            const User &user = room.users[userIndex];
+            text += user.name;
+            if (userIndex < room.users.size() - 1)
+                text += ", ";
+        }
+        text += ')';
+        roomButton.setText(text);
     }
 }

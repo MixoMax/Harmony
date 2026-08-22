@@ -11,6 +11,7 @@
 #include <pulse/simple.h>
 
 #include "../settings.h"
+#include "graphics/AudioVisualizer.h"
 #include "transmissionTechnologies/TransmissionManager.h"
 
 
@@ -45,7 +46,7 @@ VoiceChannelManager::VoiceChannelManager() {
                 fprintf(stderr, "AudioCapture failed: %s\n", pa_strerror(paCaptureErrorCode));
                 return 1;
             }
-            int8_t captureBuffer[packageSize];
+            int16_t captureBuffer[packageSize / sizeof(int16_t)];
 
             int paPlaybackErrorCode;
             pa_simple *playbackStream = pa_simple_new(
@@ -88,13 +89,17 @@ VoiceChannelManager::VoiceChannelManager() {
 
 
                 /*capture audio*/
-                if (pa_simple_read(captureStream, captureBuffer, packageSize * sizeof(int8_t),
+                if (pa_simple_read(captureStream, captureBuffer, packageSize,
                                    &paCaptureErrorCode) < 0) {
                     fprintf(stderr, "pa_simple_read() failed: %s\n", pa_strerror(paCaptureErrorCode));
                     break;
                 }
-                TransmissionManager::instance->send(reinterpret_cast<char *>(captureBuffer),
-                                                    packageSize);
+                AudioVisualizer::audioData.load().reset();
+                AudioVisualizer::audioData.store(std::make_shared<std::vector<int16_t> >());
+                for (int16_t &i: captureBuffer) {
+                    AudioVisualizer::audioData.load()->emplace_back(i);
+                }
+                TransmissionManager::instance->send(captureBuffer, packageSize);
             }
 
             TransmissionManager::instance->disconnect();

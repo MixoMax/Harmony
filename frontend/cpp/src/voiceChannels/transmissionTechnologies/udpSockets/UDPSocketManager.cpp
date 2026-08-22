@@ -4,6 +4,7 @@
 
 #include "UDPSocketManager.h"
 
+#include <complex>
 #include <cstring>
 #include <iostream>
 #include <arpa/inet.h>
@@ -12,6 +13,11 @@
 #include "../../../httpUtils/Client.h"
 
 void UDPSocketManager::connect() {
+    if (isConnected) {
+        std::cerr << "Already connected" << std::endl;
+        return;
+    }
+
     TransmissionManager::connect();
     isConnected = true;
 
@@ -24,7 +30,7 @@ void UDPSocketManager::connect() {
             const ssize_t bytesRead = recvfrom(Client::udpSocket, buffer, 4 + packageSize, 0,
                                                reinterpret_cast<sockaddr *>(&receiveAddress),
                                                &receiveAddressLength);
-            std::cout << "> received " << bytesRead << " bytes" << std::endl;
+            // std::cout << "> received " << bytesRead << " bytes" << std::endl;
 
             if (bytesRead < 4) {
                 if (isConnected) {
@@ -52,8 +58,8 @@ void UDPSocketManager::connect() {
                 sender.receiveSequenceNumber = sequenceNumber;
 
                 receiveCallback(buffer + 4, bytesRead - 4);
-                std::cout << "> total receiving progress: " <<
-                        static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
+                // std::cout << "> total receiving progress: " <<
+                //         static_cast<double>(sequenceNumber) / 0xFFFFFFFF * 100 << "%" << std::endl;
             }
         }
     });
@@ -75,9 +81,64 @@ void UDPSocketManager::disconnect() {
     receiveThread.reset();
 }
 
-void UDPSocketManager::send(char *data, const size_t length) {
+
+using Complex = std::complex<float>; // float is faster than double for live audio
+const float PI = std::acos(-1.0f);
+
+// 1. High-speed bit reversal helper to reorder data in-place
+void bit_reverse_permutation(std::vector<Complex> &x) {
+    size_t n = x.size();
+    size_t j = 0;
+    for (size_t i = 0; i < n; ++i) {
+        if (i < j) {
+            std::swap(x[i], x[j]);
+        }
+        size_t bit = n >> 1;
+        while (j & bit) {
+            j ^= bit;
+            bit >>= 1;
+        }
+        j ^= bit;
+    }
+}
+
+// 2. High-performance, iterative In-Place FFT (No allocations)
+void fft_inplace(std::vector<Complex> &x, bool inverse = false) {
+    size_t n = x.size();
+
+    // First, scramble the array indices into bit-reversed order
+    bit_reverse_permutation(x);
+
+    // Bottom-up butterfly merge
+    for (size_t len = 2; len <= n; len <<= 1) {
+        float angle = 2 * PI / len * (inverse ? 1 : -1);
+        Complex wlen(std::cos(angle), std::sin(angle));
+
+        for (size_t i = 0; i < n; i += len) {
+            Complex w(1);
+            for (size_t j = 0; j < len / 2; ++j) {
+                Complex u = x[i + j];
+                Complex v = x[i + j + len / 2] * w;
+
+                x[i + j] = u + v;
+                x[i + j + len / 2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    // Scaling factor for Inverse FFT (IFFT)
+    if (inverse) {
+        for (auto &val: x) {
+            val /= n;
+        }
+    }
+}
+
+void UDPSocketManager::send(int16_t *data, const size_t length) {
     ++totalSendedPackages;
     ++sendSequenceNumber;
+
 
     char sendBuffer[4 + packageSize];
     const uint32_t sequenceNumberNetworkRepresentation = htonl(sendSequenceNumber);
@@ -89,7 +150,8 @@ void UDPSocketManager::send(char *data, const size_t length) {
 
     // auto t1 = std::chrono::high_resolution_clock::now();
     for (const auto &user: otherUsers) {
-        // std::cout << "> sending to " << user.name << std::endl;
+        // std::cout << "> sending to " << user.name << "(" << inet_ntoa(user.sockaddr.sin_addr) << ":" <<
+        //         ntohs(user.sockaddr.sin_port) << ")" << std::endl;
         const ssize_t sendResult = sendto(Client::udpSocket, sendBuffer, 4 + packageSize, 0,
                                           (struct sockaddr *) &user.sockaddr,
                                           sizeof(user.sockaddr));

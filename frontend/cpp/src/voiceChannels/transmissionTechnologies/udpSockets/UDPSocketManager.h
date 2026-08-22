@@ -16,12 +16,14 @@ class UDPSocketManager : public TransmissionManager {
     u_int32_t sendSequenceNumber{0};
     u_int32_t receiveSequenceNumber{0};
 
+    std::atomic_bool running{false};
+
 public:
     void connect() override;
 
     void disconnect() override;
 
-    void send(char *data, size_t length) override;
+    void send(int16_t *data, size_t length) override;
 };
 
 

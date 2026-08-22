@@ -13,10 +13,10 @@ class VoiceChannelManager {
     std::thread thread;
 
     std::mutex mutex;
-    std::string roomName;
-    std::string userName;
-    std::string micDeviceName;
-    std::string speakerDeviceName;
+    std::string roomName{};
+    std::string userName{};
+    std::string micDeviceName{};
+    std::string speakerDeviceName{};
 
     VoiceChannelManager();
 

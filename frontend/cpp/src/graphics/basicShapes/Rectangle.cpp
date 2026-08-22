@@ -8,12 +8,6 @@
 #include "../../../BasicCppLibrary/vectors/vec2.h"
 #include "../../supporters/SDF.h"
 
-Rectangle::Rectangle(const float x, const float y, const float width, const float height, const float borderRadius,
-                     const float rotation) : x(x), y(y),
-                                             width(width), height(height),
-                                             borderRadius(borderRadius), rotation(rotation) {
-}
-
 bool Rectangle::isHovered(const float mouseX, const float mouseY) const {
     return isHovered(mouseX, mouseY, x, y, width, height, borderRadius, rotation);
 }

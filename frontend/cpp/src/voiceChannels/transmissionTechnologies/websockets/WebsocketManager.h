@@ -18,7 +18,7 @@ public:
 
     void disconnect() override;
 
-    void send(char *data, size_t length) override;
+    void send(int16_t *data, size_t length) override;
 };
 
 
