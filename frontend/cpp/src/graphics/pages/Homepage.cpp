@@ -14,23 +14,15 @@
 Homepage::Homepage() {
     reloadRooms();
 
-
-    exitButton.setSize(500, 200);
-    exitButton.setColor(vec4(0, 0, 0, 1));
-    exitButton.setRadius(100);
-    exitButton.setRotation(0);
+    exitButton.setBorderRadius(100);
     exitButton.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
         // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
         Client::disconnectFromRoom();
         // }
     });
-    exitButton.text = "exit";
+    exitButton.setText("exit");
 
-
-    refreshButton.setSize(500, 200);
-    refreshButton.setColor(vec4(0, 0, 0, 1));
-    refreshButton.setRadius(100);
-    refreshButton.setRotation(0);
+    refreshButton.setBorderRadius(100);
     refreshButton.setOnPressed(
         [this](GLFWwindow *window, const int button, const int action,
                const int mods) {
@@ -38,18 +30,17 @@ Homepage::Homepage() {
             reloadRooms();
             // }
         });
-    refreshButton.text = "refresh";
+    refreshButton.setText("refresh");
 }
 
-Homepage::~Homepage() {
-}
+Homepage::~Homepage() = default;
 
 void Homepage::draw() {
     Page::draw();
 
     //Background
     background.useShader();
-    glUniform1f(background.getUniform("uTime"), glfwGetTime());
+    glUniform1f(background.getUniform("uTime"), static_cast<float>(glfwGetTime()));
     glUniform2f(background.getUniform("uResolution"), static_cast<float>(getScreenWidth()),
                 static_cast<float>(getScreenHeight()));
     RectangularMesh::getInstance()->draw();
@@ -77,12 +68,12 @@ void Homepage::draw() {
 
     //Exit
     const float exitButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10 + 430;
-    exitButton.setPosition(-getScreenWidth() + 500, exitButtonY);
+    exitButton.setPosition(500.f - getScreenWidth(), exitButtonY);
     exitButton.draw();
 
     //Refresh
     const float refreshButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10;
-    refreshButton.setPosition(-getScreenWidth() + 500, refreshButtonY);
+    refreshButton.setPosition(500.f - getScreenWidth(), refreshButtonY);
     refreshButton.draw();
 }
 
@@ -99,7 +90,7 @@ void Homepage::reloadRooms() {
         roomButton.setSize(1400, buttonHeight);
         roomButton.setPosition(0, buttonY);
         roomButton.setColor(vec4(0.8353, 0.0784, 0.7882, 1));
-        roomButton.setRadius(100);
+        roomButton.setBorderRadius(100);
         roomButton.setRotation(0);
         roomButton.setOnPressed([&room](GLFWwindow *window, const int button, const int action, const int mods) {
             // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {

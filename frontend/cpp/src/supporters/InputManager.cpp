@@ -50,3 +50,9 @@ size_t InputManager::addMouseButtonCallback(MouseButtonCallback callback) {
 void InputManager::removeMouseButtonCallback(size_t id) {
     std::erase_if(mouseButtonCallbacks, [id](const MouseButtonCallbackEntry &entry) { return entry.id == id; });
 }
+
+bool InputManager::isMousePressed() {
+    return glfwGetMouseButton(GraphicsManager::getInstance().window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
+           || glfwGetMouseButton(GraphicsManager::getInstance().window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS
+           || glfwGetMouseButton(GraphicsManager::getInstance().window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+}

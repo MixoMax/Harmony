@@ -29,7 +29,7 @@ class Homepage : public Page {
     float totalNeededHeight = (rooms.size() - 1) * spaceBetweenButtons;
 
     const Font defaultFont{
-        .family = "Roboto", .size = 2, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center
+        .family = "Cause", .size = 2, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center
     };
 
 public:

@@ -15,7 +15,8 @@
 
 
 class FilledButton : public Widget {
-    Rectangle rectangle{};
+    float borderRadius = 0;
+    vec2 position{};
     vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.f);
     size_t onPressedId = -1;
 
@@ -25,14 +26,15 @@ class FilledButton : public Widget {
 
     static Shader *shader;
 
+
+    bool isHovered(float mouseX, float mouseY) const;
+
 public:
     Widget child;
 
     FilledButton() = default;
 
     ~FilledButton();
-
-    void setSize(float width, float height);
 
     void setColor(vec4 newColor);
 
@@ -44,9 +46,7 @@ public:
 
     [[nodiscard]] float getY() const;
 
-    void setRotation(float rotation);
-
-    void setRadius(float radius);
+    void setBorderRadius(float newBorderRadius);
 
     void setOnPressed(const MouseButtonCallback &onPressed);
 

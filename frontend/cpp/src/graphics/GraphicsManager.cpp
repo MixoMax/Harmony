@@ -112,8 +112,6 @@ GraphicsManager *GraphicsManager::init() {
         }
     });
 
-    instance->currentPage = new Homepage();
-
     return instance;
 }
 
@@ -139,12 +137,17 @@ void GraphicsManager::start() {
     InputManager::initializeInputManager();
     initializeMeshes();
     initializeShaders();
-    CharacterManager::initializeCharacterManager(fontQualityInPixel, {{"Roboto", "res/fonts/Roboto-Regular.ttf"}});
+    CharacterManager::initializeCharacterManager(fontQualityInPixel, {
+                                                     {"Roboto", "res/fonts/Roboto-Regular.ttf"},
+                                                     {"Cause", "res/fonts/Cause-Regular.ttf"}
+                                                 });
 
 
     const Font fpsFont{
         .family = "Roboto", .size = 1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
     };
+
+    currentPage = new Homepage();
 
     double lastUpdate = glfwGetTime();
 

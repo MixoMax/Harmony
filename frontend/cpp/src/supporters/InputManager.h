@@ -47,6 +47,8 @@ public:
     static size_t addMouseButtonCallback(MouseButtonCallback callback);
 
     static void removeMouseButtonCallback(size_t id);
+
+    static bool isMousePressed();
 };
 
 

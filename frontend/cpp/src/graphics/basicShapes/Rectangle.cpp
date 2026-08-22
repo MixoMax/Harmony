@@ -8,13 +8,18 @@
 #include "../../../BasicCppLibrary/vectors/vec2.h"
 #include "../../supporters/SDF.h"
 
-Rectangle::Rectangle(const float x, const float y, const float width, const float height, const float radius,
+Rectangle::Rectangle(const float x, const float y, const float width, const float height, const float borderRadius,
                      const float rotation) : x(x), y(y),
                                              width(width), height(height),
-                                             radius(radius), rotation(rotation) {
+                                             borderRadius(borderRadius), rotation(rotation) {
 }
 
 bool Rectangle::isHovered(const float mouseX, const float mouseY) const {
+    return isHovered(mouseX, mouseY, x, y, width, height, borderRadius, rotation);
+}
+
+bool Rectangle::isHovered(const float mouseX, const float mouseY, const float x, const float y, const float width,
+                          const float height, const float borderRadius, const float rotation) {
     vec2 uv(mouseX, mouseY);
     uv.x *= static_cast<float>(GraphicsManager::getInstance().getScreenWidth());
     uv.y *= static_cast<float>(GraphicsManager::getInstance().getScreenHeight());
@@ -24,7 +29,7 @@ bool Rectangle::isHovered(const float mouseX, const float mouseY) const {
     uv = uv.rotate(rotation);
 
 
-    if (sdRoundedBox(uv, width, height, radius) <= 0) {
+    if (sdRoundedBox(uv, width, height, borderRadius) <= 0) {
         return true;
     }
 

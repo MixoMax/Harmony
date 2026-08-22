@@ -4,51 +4,46 @@
 
 #include "FilledButton.h"
 
-#include <utility>
-
 #include "../GraphicsManager.h"
 #include "../../supporters/InputManager.h"
 #include "../meshes/RectangularMesh.h"
 
 Shader *FilledButton::shader = nullptr;
 
+bool FilledButton::isHovered(const float mouseX, const float mouseY) const {
+    return Rectangle::isHovered(
+        mouseX, mouseY, position.x, position.y, getWidth(), getHeight(), borderRadius, rotation);
+}
+
 FilledButton::~FilledButton() {
     deleteOnPressed();
 }
 
-void FilledButton::setSize(const float width, const float height) {
-    rectangle.width = width;
-    rectangle.height = height;
-}
 
 void FilledButton::setColor(const vec4 newColor) {
     this->color = newColor;
 }
 
 void FilledButton::setPosition(const float x, const float y) {
-    rectangle.x = x;
-    rectangle.y = y;
+    position.x = x;
+    position.y = y;
 }
 
 vec2 FilledButton::getPosition() const {
-    return {rectangle.x, rectangle.y};
+    return position;
 }
 
 float FilledButton::getX() const {
-    return rectangle.x;
+    return position.x;
 }
 
 float FilledButton::getY() const {
-    return rectangle.y;
+    return position.y;
 }
 
 
-void FilledButton::setRotation(const float rotation) {
-    rectangle.rotation = rotation;
-}
-
-void FilledButton::setRadius(const float radius) {
-    rectangle.radius = radius;
+void FilledButton::setBorderRadius(const float newBorderRadius) {
+    this->borderRadius = newBorderRadius;
 }
 
 void FilledButton::setOnPressed(const MouseButtonCallback &onPressed) {
@@ -56,7 +51,7 @@ void FilledButton::setOnPressed(const MouseButtonCallback &onPressed) {
     onPressedId = InputManager::addMouseButtonCallback(
         [this, onPressed](GLFWwindow *window, const int button, const int action, const int mods) {
             if (const auto &graphicsManager = GraphicsManager::getInstance();
-                rectangle.isHovered(
+                isHovered(
                     static_cast<float>(graphicsManager.mouseX),
                     static_cast<float>(graphicsManager.mouseY))) {
                 onPressed(window, button, action, mods);
@@ -75,11 +70,8 @@ void FilledButton::draw() {
     if (const RectangularMesh *mesh = RectangularMesh::getInstance(); mesh != nullptr) {
         shader->useShader();
         const auto &graphicsManager = GraphicsManager::getInstance();
-        if (rectangle.isHovered(
-                static_cast<float>(graphicsManager.mouseX),
-                static_cast<float>(graphicsManager.mouseY)) && glfwGetMouseButton(
-                GraphicsManager::getWindow(), GLFW_MOUSE_BUTTON_LEFT) ==
-            GLFW_PRESS) {
+        if (isHovered(static_cast<float>(graphicsManager.mouseX), static_cast<float>(graphicsManager.mouseY))
+            && InputManager::isMousePressed()) {
             glUniform1i(shader->getUniform("uClick"), 1);
             lastClickTime = glfwGetTime();
             lastClickPosition = {
@@ -90,17 +82,16 @@ void FilledButton::draw() {
         }
         glUniform2f(shader->getUniform("uResolution"), static_cast<float>(graphicsManager.getScreenWidth()),
                     static_cast<float>(graphicsManager.getScreenHeight()));
-        glUniform2f(shader->getUniform("uSize"), rectangle.width, rectangle.height);
-        glUniform1f(shader->getUniform("uRadius"), rectangle.radius);
-        glUniform1f(shader->getUniform("uRotation"), rectangle.rotation);
-        glUniform2f(shader->getUniform("uPosition"), rectangle.x, rectangle.y);
+        glUniform2f(shader->getUniform("uSize"), getWidth(), getHeight());
+        glUniform1f(shader->getUniform("uRadius"), borderRadius);
+        glUniform1f(shader->getUniform("uRotation"), rotation);
+        glUniform2f(shader->getUniform("uPosition"), position.x, position.y);
         glUniform4f(shader->getUniform("uColor"), color.x, color.y, color.z, color.w);
-        glUniform1f(shader->getUniform("uTime"), glfwGetTime());
+        glUniform1f(shader->getUniform("uTime"), static_cast<float>(glfwGetTime()));
         glUniform2f(shader->getUniform("uMouse"), static_cast<float>(graphicsManager.mouseX),
                     static_cast<float>(graphicsManager.mouseY));
         glUniform2f(shader->getUniform("uLastClickPosition"), lastClickPosition.x, lastClickPosition.y);
-        glUniform1f(shader->getUniform("uTimeSinceClick"), glfwGetTime() - lastClickTime);
-        // std::cout << glfwGetTime() - lastClickTime << std::endl;
+        glUniform1f(shader->getUniform("uTimeSinceClick"), static_cast<float>(glfwGetTime() - lastClickTime));
 
         mesh->draw();
     }

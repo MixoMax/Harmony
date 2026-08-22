@@ -12,6 +12,23 @@ void Widget::setMinHeight(const float newMinHeight) { this->minHeight = std::max
 
 void Widget::setMaxHeight(const float newMaxHeight) { this->maxHeight = std::min(this->maxHeight, newMaxHeight); }
 
+void Widget::setSize(const float newWidth, const float newHeight) {
+    width = newWidth;
+    height = newHeight;
+}
+
+void Widget::setWidth(const float newWidth) {
+    this->width = newWidth;
+}
+
+void Widget::setHeight(const float newHeight) {
+    this->height = newHeight;
+}
+
+void Widget::setRotation(const float newRotation) {
+    this->rotation = newRotation;
+}
+
 float Widget::getMinWidth() const { return this->minWidth; }
 
 float Widget::getMaxWidth() const { return this->maxWidth; }
@@ -19,3 +36,9 @@ float Widget::getMaxWidth() const { return this->maxWidth; }
 float Widget::getMinHeight() const { return this->minHeight; }
 
 float Widget::getMaxHeight() const { return this->maxHeight; }
+
+float Widget::getWidth() const { return this->width == -1 ? this->minWidth : this->width; }
+
+float Widget::getHeight() const { return this->height == -1 ? this->minHeight : this->height; }
+
+float Widget::getRotation() const { return this->rotation; }
