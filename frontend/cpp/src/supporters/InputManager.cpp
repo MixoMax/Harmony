@@ -17,20 +17,39 @@ size_t InputManager::currentKeyCallbackIndex{0};
 std::vector<MouseButtonCallbackEntry> InputManager::mouseButtonCallbacks;
 size_t InputManager::currentMouseButtonCallbackIndex{0};
 
+Widget *InputManager::selectedWidget{nullptr};
+bool InputManager::shiftHeld{false};
+
 void InputManager::initializeInputManager() {
     const auto window = GraphicsManager::getInstance().window;
     glfwSetKeyCallback(window,
                        [](GLFWwindow *w, const int key, const int scancode, const int action, const int mods) {
+                           if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) {
+                               shiftHeld = action == GLFW_PRESS;
+                           }
+
                            for (auto &[id, callback]: keyCallbacks) {
                                callback(w, key, scancode, action, mods);
                            }
                        });
 
     glfwSetMouseButtonCallback(window, [](GLFWwindow *w, const int button, const int action, const int mods) {
+        if (action == GLFW_PRESS) {
+            selectedWidget = nullptr;
+        }
+
         for (auto &[id, callback]: mouseButtonCallbacks) {
             callback(w, button, action, mods);
         }
     });
+}
+
+void InputManager::requestFocus(Widget *widget) {
+    selectedWidget = widget;
+}
+
+bool InputManager::hasFocus(const Widget *widget) {
+    return selectedWidget == widget;
 }
 
 size_t InputManager::addKeyCallback(KeyCallback callback) {
@@ -43,7 +62,7 @@ void InputManager::removeKeyCallback(size_t id) {
 }
 
 size_t InputManager::addMouseButtonCallback(MouseButtonCallback callback) {
-    mouseButtonCallbacks.push_back({currentMouseButtonCallbackIndex, std::move(callback)});
+    mouseButtonCallbacks.push_back({.id = currentMouseButtonCallbackIndex, .callback = std::move(callback)});
     return currentMouseButtonCallbackIndex++;
 }
 

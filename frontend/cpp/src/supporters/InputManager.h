@@ -9,20 +9,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "../graphics/widgets/Widget.h"
+
 #define KEY_NOT_PRESSED = 0;
 #define KEY_CLICKED = 1;
 #define KEY_PRESSED = 2;
 #define KEY_RELEASED = 3;
 
-using KeyCallback = std::function<void(GLFWwindow *w, const int key, const int scancode, const int action,
-                                       const int mods)>;
+using KeyCallback = std::function<void(GLFWwindow *w, int key, int scancode, int action, int mods)>;
 
 struct KeyCallbackEntry {
     size_t id;
     KeyCallback callback;
 };
 
-using MouseButtonCallback = std::function<void(GLFWwindow *window, const int button, const int action, const int mods)>;
+using MouseButtonCallback = std::function<void(GLFWwindow *window, int button, int action, int mods)>;
 
 struct MouseButtonCallbackEntry {
     size_t id;
@@ -35,10 +36,20 @@ class InputManager {
     static std::vector<MouseButtonCallbackEntry> mouseButtonCallbacks;
     static size_t currentMouseButtonCallbackIndex;
 
+
+    static Widget *selectedWidget;
+
 public:
+    static bool shiftHeld;
+
     InputManager() = delete;
 
     static void initializeInputManager();
+
+
+    static void requestFocus(Widget *widget);
+
+    static bool hasFocus(const Widget *widget);
 
     static size_t addKeyCallback(KeyCallback callback);
 

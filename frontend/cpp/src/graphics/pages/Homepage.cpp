@@ -4,8 +4,8 @@
 
 #include "Homepage.h"
 
+#include "CallPage.h"
 #include "../GraphicsManager.h"
-#include "../../../BasicCppLibrary/supporters/interpolation.h"
 #include "../../../BasicCppLibrary/text/CharacterManager.h"
 #include "../../httpUtils/Client.h"
 #include "../meshes/RectangularMesh.h"
@@ -14,23 +14,35 @@
 Homepage::Homepage() {
     reloadRooms();
 
-    exitButton.setBorderRadius(100);
-    exitButton.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
-        // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        Client::disconnectFromRoom();
-        // }
-    });
-    exitButton.setText("exit");
 
-    refreshButton.setBorderRadius(100);
-    refreshButton.setOnPressed(
+    bRefreshRooms.setOnPressed(
         [this](GLFWwindow *window, const int button, const int action,
                const int mods) {
-            // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-            reloadRooms();
-            // }
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                reloadRooms();
+            }
         });
-    refreshButton.setText("refresh");
+    bRefreshRooms.setText("refresh");
+
+    bCreateRoom.setOnPressed([this](GLFWwindow *window, const int button, const int action,
+                                    const int mods) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            const std::string roomName = tfRoomName.getText();
+            const std::string userName = tfUserName.getText();
+            if (userName.empty() || roomName.empty()) {
+                std::cerr << "> Username or room name is empty!" << std::endl;
+                return;
+            }
+
+            std::cout << "Pressed on connect with room " << roomName << std::endl;
+            Client::connectToRoom(roomName, userName);
+            GraphicsManager::getInstance().setCurrentPage(new CallPage());
+        }
+    });
+    bCreateRoom.setText("create room");
+
+    tfUserName.setMinSize(400, 100);
+    tfRoomName.setMinSize(400, 100);
 }
 
 Homepage::~Homepage() = default;
@@ -47,41 +59,52 @@ void Homepage::draw() {
 
 
     //Rooms
-    for (auto &roomButton: roomButtons) {
+    for (int roomIndex = 0; roomIndex < bRooms.size(); roomIndex++) {
+        auto &roomButton = bRooms[roomIndex];
+        const float yOffset = roomIndex * (bRooms[roomIndex].getHeight() * 2 + 20);
+        roomButton.setPosition(roomButton.getWidth() - getScreenWidth(),
+                               getScreenHeight() - roomButton.getHeight() - bRefreshRooms.getHeight() * 2 - 40 -
+                               yOffset);
         roomButton.draw();
     }
 
-
-    //Exit
-    const float exitButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10 + 430;
-    exitButton.setPosition(500.f - getScreenWidth(), exitButtonY);
-    exitButton.draw();
-
     //Refresh
-    const float refreshButtonY = -static_cast<float>(getScreenHeight()) + 200 + 10;
-    refreshButton.setPosition(500.f - getScreenWidth(), refreshButtonY);
-    refreshButton.draw();
+    bRefreshRooms.setPosition(500.f - getScreenWidth(), getScreenHeight() - bRefreshRooms.getHeight());
+    bRefreshRooms.draw();
 
 
-    audioVisualizer.draw();
+    tfRoomName.setPosition(tfRoomName.getWidth() - getScreenWidth(),
+                           tfRoomName.getHeight() - getScreenHeight() + bCreateRoom.getHeight() * 2);
+    tfRoomName.draw();
+    bCreateRoom.setPosition(bCreateRoom.getWidth() - getScreenWidth(), bCreateRoom.getHeight() - getScreenHeight());
+    bCreateRoom.draw();
+
+    tfUserName.setPosition(getScreenWidth() - tfUserName.getWidth(), tfUserName.getHeight() - getScreenHeight());
+    tfUserName.draw();
 }
 
 
 void Homepage::reloadRooms() {
     rooms = Client::getRooms();
-    roomButtons.clear();
+    bRooms.clear();
+    const float totalNeededHeight = (rooms.size() - 1) * spaceBetweenButtons;
     for (int roomIndex = 0; roomIndex < rooms.size(); ++roomIndex) {
         const auto &room = rooms[roomIndex];
         const float buttonY = -roomIndex * spaceBetweenButtons + totalNeededHeight / 2;
 
-        roomButtons.emplace_back();
-        TextButton &roomButton = roomButtons.back();
+        TextButton &roomButton = bRooms.emplace_back();
         roomButton.setPosition(0, buttonY);
         roomButton.setBorderRadius(100);
-        roomButton.setOnPressed([&room](GLFWwindow *window, const int button, const int action, const int mods) {
+        roomButton.setOnPressed([&room, this](GLFWwindow *window, const int button, const int action, const int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+                if (tfUserName.getText().empty()) {
+                    std::cerr << "> Username is empty!" << std::endl;
+                    return;
+                }
+
                 std::cout << "Pressed on connect with room " << room.name << std::endl;
-                Client::connectToRoom(room.name, "maxmustermann");
+                Client::connectToRoom(room.name, tfUserName.getText());
+                GraphicsManager::getInstance().setCurrentPage(new CallPage());
             }
         });
 

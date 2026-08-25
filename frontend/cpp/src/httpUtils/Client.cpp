@@ -12,6 +12,10 @@
 #include "dataClasses/Room.h"
 
 ix::WebSocket Client::roomWebsocket{};
+std::function<void(User &)> Client::joinCallback = [](User &) {
+};
+std::function<void(User &)> Client::leaveCallback = [](User &) {
+};
 
 void Client::bindPort() {
     udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -87,17 +91,19 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                     /*receiving connects & disconnects*/
                     json j = json::parse(msg->str);
                     if (j["type"] == "user_joined") {
-                        TransmissionManager::otherUsers.emplace_back(j["user"]);
+                        User &user = TransmissionManager::otherUsers.emplace_back(j["user"]);
                         std::cout << "> User joined: " << j["user"]["name"] << std::endl;
+                        // joinCallback(user);
                     } else if (j["type"] == "user_left") {
-                        const User user{j["user"]};
+                        User user{j["user"]};
                         std::erase_if(TransmissionManager::otherUsers,
                                       [&](const User &other) {
                                           return user.id == other.id;
                                       });
                         std::cout << "> User left: " << user.name << std::endl;
+                        // leaveCallback(user);
                     } else if (j["type"] == "room_joined") {
-                        const Room room{j["room"]};
+                        Room room{j["room"]};
                         TransmissionManager::otherUsers = room.users;
                         std::cout << "> Room joined: " << room.name << std::endl;
                         if (room.users.empty()) {
@@ -109,6 +115,7 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                                 if (userIndex < room.users.size() - 1) {
                                     std::cout << ", ";
                                 }
+                                // joinCallback(room.users[userIndex]);
                             }
                             std::cout << std::endl;
                         }

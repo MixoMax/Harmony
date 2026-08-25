@@ -13,21 +13,23 @@
 #include "../../httpUtils/dataClasses/Room.h"
 #include "../../voiceChannels/graphics/AudioVisualizer.h"
 #include "../widgets/TextButton.h"
+#include "../widgets/TextField.h"
 
 
 class Homepage : public Page {
     Shader background{"backgroundShader"};
 
     std::vector<Room> rooms = Client::getRooms();
-    std::vector<TextButton> roomButtons{};
 
-    TextButton refreshButton{};
-    TextButton exitButton{};
-    AudioVisualizer audioVisualizer{};
+    TextButton bRefreshRooms{};
+    std::vector<TextButton> bRooms{};
+    TextButton bCreateRoom{};
+    TextField tfUserName{};
+    TextField tfRoomName{};
 
     static constexpr float buttonHeight = 300;
     static constexpr float spaceBetweenButtons = buttonHeight * 2 + 20;
-    float totalNeededHeight = (rooms.size() - 1) * spaceBetweenButtons;
+
 
     const Font defaultFont{
         .family = "Cause", .size = 2, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center

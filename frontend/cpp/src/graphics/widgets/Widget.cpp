@@ -12,6 +12,11 @@ void Widget::setMinHeight(const float newMinHeight) { this->minHeight = std::max
 
 void Widget::setMaxHeight(const float newMaxHeight) { this->maxHeight = std::min(this->maxHeight, newMaxHeight); }
 
+void Widget::setMinSize(const float newMinWidth, const float newMinHeight) {
+    minWidth = newMinWidth;
+    minHeight = newMinHeight;
+}
+
 void Widget::setSize(const float newWidth, const float newHeight) {
     width = newWidth;
     height = newHeight;

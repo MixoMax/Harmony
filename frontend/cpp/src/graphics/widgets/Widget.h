@@ -26,6 +26,8 @@ public:
 
     void setMaxHeight(float newMaxHeight);
 
+    void setMinSize(float newMinWidth, float newMinHeight);
+
     void setSize(float newWidth, float newHeight);
 
     void setWidth(float newWidth);

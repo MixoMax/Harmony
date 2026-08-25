@@ -84,6 +84,10 @@ add_executable(Harmony
         src/graphics/widgets/TextButton.h
         src/voiceChannels/graphics/AudioVisualizer.cpp
         src/voiceChannels/graphics/AudioVisualizer.h
+        src/graphics/widgets/TextField.cpp
+        src/graphics/widgets/TextField.h
+        src/graphics/pages/CallPage.cpp
+        src/graphics/pages/CallPage.h
 )
 
 #include directories

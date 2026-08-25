@@ -15,7 +15,7 @@
 
 
 class FilledButton : public Widget {
-    float borderRadius = 0;
+    float borderRadius = 100;
     vec2 position{};
     vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.f);
     size_t onPressedId = -1;
@@ -27,7 +27,7 @@ class FilledButton : public Widget {
     static Shader *shader;
 
 
-    bool isHovered(float mouseX, float mouseY) const;
+    [[nodiscard]] bool isHovered(float mouseX, float mouseY) const;
 
 public:
     Widget child;

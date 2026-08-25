@@ -158,6 +158,12 @@ void GraphicsManager::start() {
         mouseX = mouseX * 2 - 1;
         mouseY = -mouseY * 2 + 1;
 
+
+        if (nextPage != nullptr) {
+            delete currentPage;
+            currentPage = nextPage;
+            nextPage = nullptr;
+        }
         /*Draw current Page*/
         currentPage->draw();
 
@@ -171,6 +177,12 @@ void GraphicsManager::start() {
 
         glfwPollEvents();
     }
+}
+
+void GraphicsManager::setCurrentPage(Page *page) {
+    delete nextPage;
+    nextPage = page;
+    std::cout << "Page changed" << std::endl;
 }
 
 void GraphicsManager::cleanup() {

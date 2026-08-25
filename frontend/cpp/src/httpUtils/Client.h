@@ -23,6 +23,9 @@ public:
 
     static std::vector<Room> getRooms();
 
+    static std::function<void(User &)> joinCallback;
+    static std::function<void(User &)> leaveCallback;
+
 
     static void connectToRoom(const std::string &roomName, const std::string &username);
 

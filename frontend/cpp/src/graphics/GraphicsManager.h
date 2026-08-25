@@ -26,6 +26,7 @@ public:
     GLFWwindow *window = nullptr;
     double mouseX, mouseY;
     Page *currentPage = nullptr;
+    Page *nextPage = nullptr;
 
     static GraphicsManager &getInstance();
 
@@ -40,6 +41,8 @@ public:
     [[nodiscard]] int getScreenHeight() const;
 
     void start();
+
+    void setCurrentPage(Page *page);
 
     static void cleanup();
 };
