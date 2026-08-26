@@ -8,14 +8,37 @@
 #include "../settings.h"
 #include "../voiceChannels/VoiceChannelManager.h"
 #include "../voiceChannels/transmissionTechnologies/TransmissionManager.h"
-#include "../voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.h"
 #include "dataClasses/Room.h"
 
 ix::WebSocket Client::roomWebsocket{};
+
+int Client::port{0};
+int Client::udpSocket{0};
+sockaddr_in Client::ownAddress{};
+
+std::mutex Client::usersJoinedMutex{};
+std::queue<User> Client::usersJoined{};
 std::function<void(User &)> Client::joinCallback = [](User &) {
 };
+std::mutex Client::usersLeftMutex{};
+std::queue<User> Client::usersLeft{};
 std::function<void(User &)> Client::leaveCallback = [](User &) {
 };
+
+void Client::update() {
+    if (const std::unique_lock lock(usersJoinedMutex, std::try_to_lock); lock.owns_lock()) {
+        while (!usersJoined.empty()) {
+            joinCallback(usersJoined.front());
+            usersJoined.pop();
+        }
+    }
+    if (const std::unique_lock lock(usersLeftMutex, std::try_to_lock); lock.owns_lock()) {
+        while (!usersLeft.empty()) {
+            leaveCallback(usersLeft.front());
+            usersLeft.pop();
+        }
+    }
+}
 
 void Client::bindPort() {
     udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -43,9 +66,6 @@ void Client::bindPort() {
     port = ntohs(ownAddress.sin_port);
 }
 
-int Client::port{0};
-int Client::udpSocket{0};
-sockaddr_in Client::ownAddress{};
 
 std::vector<Room> Client::getRooms() {
     httplib::Client cli(serverURL);
@@ -91,19 +111,21 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                     /*receiving connects & disconnects*/
                     json j = json::parse(msg->str);
                     if (j["type"] == "user_joined") {
-                        User &user = TransmissionManager::otherUsers.emplace_back(j["user"]);
+                        const User &user = TransmissionManager::otherUsers.emplace_back(j["user"]);
                         std::cout << "> User joined: " << j["user"]["name"] << std::endl;
-                        // joinCallback(user);
+                        std::lock_guard lock(usersJoinedMutex);
+                        usersJoined.push(user);
                     } else if (j["type"] == "user_left") {
-                        User user{j["user"]};
+                        const User user{j["user"]};
                         std::erase_if(TransmissionManager::otherUsers,
                                       [&](const User &other) {
                                           return user.id == other.id;
                                       });
                         std::cout << "> User left: " << user.name << std::endl;
-                        // leaveCallback(user);
+                        std::lock_guard lock(usersLeftMutex);
+                        usersLeft.push(user);
                     } else if (j["type"] == "room_joined") {
-                        Room room{j["room"]};
+                        const Room room{j["room"]};
                         TransmissionManager::otherUsers = room.users;
                         std::cout << "> Room joined: " << room.name << std::endl;
                         if (room.users.empty()) {
@@ -115,7 +137,8 @@ void Client::connectToRoom(const std::string &roomName, const std::string &usern
                                 if (userIndex < room.users.size() - 1) {
                                     std::cout << ", ";
                                 }
-                                // joinCallback(room.users[userIndex]);
+                                std::lock_guard lock(usersJoinedMutex);
+                                usersJoined.push(room.users[userIndex]);
                             }
                             std::cout << std::endl;
                         }

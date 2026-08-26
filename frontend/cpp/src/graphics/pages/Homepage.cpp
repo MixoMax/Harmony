@@ -8,6 +8,7 @@
 #include "../GraphicsManager.h"
 #include "../../../BasicCppLibrary/text/CharacterManager.h"
 #include "../../httpUtils/Client.h"
+#include "../../supporters/Navigator.h"
 #include "../meshes/RectangularMesh.h"
 #include "../widgets/FilledButton.h"
 
@@ -20,7 +21,9 @@ Homepage::Homepage() {
                const int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
                 reloadRooms();
+                return true;
             }
+            return false;
         });
     bRefreshRooms.setText("refresh");
 
@@ -31,13 +34,15 @@ Homepage::Homepage() {
             const std::string userName = tfUserName.getText();
             if (userName.empty() || roomName.empty()) {
                 std::cerr << "> Username or room name is empty!" << std::endl;
-                return;
+                return true;
             }
 
             std::cout << "Pressed on connect with room " << roomName << std::endl;
             Client::connectToRoom(roomName, userName);
-            GraphicsManager::getInstance().setCurrentPage(new CallPage());
+            Navigator::push<CallPage>();
+            return true;
         }
+        return false;
     });
     bCreateRoom.setText("create room");
 
@@ -99,13 +104,15 @@ void Homepage::reloadRooms() {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
                 if (tfUserName.getText().empty()) {
                     std::cerr << "> Username is empty!" << std::endl;
-                    return;
+                    return true;
                 }
 
                 std::cout << "Pressed on connect with room " << room.name << std::endl;
                 Client::connectToRoom(room.name, tfUserName.getText());
-                GraphicsManager::getInstance().setCurrentPage(new CallPage());
+                Navigator::push<CallPage>();
+                return true;
             }
+            return false;
         });
 
 

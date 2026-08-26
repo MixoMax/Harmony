@@ -21,60 +21,48 @@ bool TextField::isHovered(const float mouseX, const float mouseY) const {
 TextField::TextField() {
     clickCallbackId = InputManager::addMouseButtonCallback(
         [this](GLFWwindow *window, int button, const int action, int mods) {
-            if (action == GLFW_PRESS && isHovered(GraphicsManager::getInstance().mouseX,
-                                                  GraphicsManager::getInstance().mouseY)) {
+            if (action == GLFW_PRESS && isHovered(static_cast<float>(GraphicsManager::getInstance().mouseX),
+                                                  static_cast<float>(GraphicsManager::getInstance().mouseY))) {
                 InputManager::requestFocus(this);
+                return true;
             }
+            return false;
         });
 
-    textCallbackId = InputManager::addKeyCallback(
+    charCallbackId = InputManager::addCharCallback(
+        [this](GLFWwindow *window, const unsigned int character) {
+            if (!InputManager::hasFocus(this)) {
+                return false;
+            }
+            text.emplace_back(character);
+            return true;
+        });
+    keyCallbackId = InputManager::addKeyCallback(
         [this](GLFWwindow *window, const int key, int scancode, const int action, int mods) {
             if (!InputManager::hasFocus(this)) {
-                return;
+                return false;
             }
             if (action == GLFW_PRESS) {
-                if (key == GLFW_KEY_BACKSPACE) {
-                    if (!text.empty()) {
-                        text.pop_back();
-                    }
-                    return;
+                switch (key) {
+                    case GLFW_KEY_ENTER:
+                        InputManager::removeFocus(this);
+                        break;
+                    case GLFW_KEY_BACKSPACE:
+                        if (!text.empty()) {
+                            text.pop_back();
+                        }
+                        break;
+                    default: break;
                 }
-
-                if (key == GLFW_KEY_SPACE) {
-                    text.emplace_back(' ');
-                    return;
-                }
-
-                int character = key - GLFW_KEY_A + 97;
-
-                if (character < 'a' || character > 'z') {
-                    int number = key - GLFW_KEY_0 + 48;
-                    if (number < '0' || number > '9') {
-                        return;
-                    }
-
-                    if (InputManager::shiftHeld) {
-                        char specialCharacters[] = {'=', '!', '"', ' ', '$', '%', '&', '/', '(', ')'};
-                        text.emplace_back(specialCharacters[number - 48]);
-                        return;
-                    }
-
-                    text.emplace_back(number);
-                    return;
-                }
-
-                if (InputManager::shiftHeld) {
-                    character -= 32;
-                }
-
-                text.emplace_back(static_cast<char>(character));
             }
+            return true;
         });
 }
 
 TextField::~TextField() {
     InputManager::removeMouseButtonCallback(clickCallbackId);
-    InputManager::removeKeyCallback(textCallbackId);
+    InputManager::removeCharCallback(charCallbackId);
+    InputManager::removeCharCallback(keyCallbackId);
 }
 
 void TextField::draw() {
@@ -103,7 +91,7 @@ void TextField::draw() {
 
     RectangularMesh::getInstance()->draw();
 
-    CharacterManager::drawText(std::string(text.begin(), text.end()), font, position.x, position.y);
+    CharacterManager::drawText(getText(), font, position.x, position.y);
 }
 
 void TextField::setPosition(const float x, const float y) {
@@ -112,7 +100,7 @@ void TextField::setPosition(const float x, const float y) {
 }
 
 std::string TextField::getText() {
-    return std::string(text.begin(), text.end());
+    return {text.begin(), text.end()};
 }
 
 void TextField::initializeShaders() {

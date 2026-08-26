@@ -7,6 +7,7 @@
 #include "Homepage.h"
 #include "../GraphicsManager.h"
 #include "../../httpUtils/Client.h"
+#include "../../supporters/Navigator.h"
 #include "../meshes/RectangularMesh.h"
 
 void CallPage::reloadUsers() {
@@ -31,8 +32,10 @@ CallPage::CallPage() {
     bExit.setOnPressed([](GLFWwindow *window, const int button, const int action, const int mods) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             Client::disconnectFromRoom();
-            GraphicsManager::getInstance().setCurrentPage(new Homepage());
+            Navigator::pop();
+            return true;
         }
+        return false;
     });
     bExit.setText("exit");
 

@@ -19,14 +19,15 @@ class TextField : public Widget {
     double lastClickTime = -99999.0;
     vec2 lastClickPosition{};
 
-    std::vector<char> text{};
+    std::vector<unsigned int> text{};
 
     static Shader *shader;
 
     [[nodiscard]] bool isHovered(float mouseX, float mouseY) const;
 
     size_t clickCallbackId = 0;
-    size_t textCallbackId = 0;
+    size_t charCallbackId = 0;
+    size_t keyCallbackId = 0;
 
 public:
     Font font{.family = "Cause", .size = 1.5, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::Center};

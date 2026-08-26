@@ -54,8 +54,10 @@ void FilledButton::setOnPressed(const MouseButtonCallback &onPressed) {
                 isHovered(
                     static_cast<float>(graphicsManager.mouseX),
                     static_cast<float>(graphicsManager.mouseY))) {
-                onPressed(window, button, action, mods);
+                return onPressed(window, button, action, mods);
             }
+
+            return false;
         });
 }
 

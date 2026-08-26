@@ -11,7 +11,8 @@
 #include "../../BasicCppLibrary/text/CharacterManager.h"
 #include "../httpUtils/Client.h"
 #include "../supporters/InputManager.h"
-#include "../supporters/interpolation.h"
+#include "../../BasicCppLibrary/supporters/interpolation.h"
+#include "../supporters/Navigator.h"
 #include "meshes/MeshInitializer.h"
 #include "pages/Homepage.h"
 #include "shaders/ShaderInitializer.h"
@@ -84,7 +85,7 @@ GraphicsManager::GraphicsManager() : screenWidth(100), screenHeight(100), screen
 }
 
 GraphicsManager::~GraphicsManager() {
-    delete currentPage;
+    Navigator::deinitialize();
     glfwDestroyWindow(window);
     glfwTerminate();
 }
@@ -134,6 +135,8 @@ int GraphicsManager::getScreenHeight() const {
 void GraphicsManager::start() {
     glfwShowWindow(window);
 
+    Navigator::initialize();
+
     InputManager::initializeInputManager();
     initializeMeshes();
     initializeShaders();
@@ -144,7 +147,7 @@ void GraphicsManager::start() {
         .family = "Roboto", .size = 1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
     };
 
-    currentPage = new Homepage();
+    Navigator::push<Homepage>();
 
     double lastUpdate = glfwGetTime();
 
@@ -159,13 +162,10 @@ void GraphicsManager::start() {
         mouseY = -mouseY * 2 + 1;
 
 
-        if (nextPage != nullptr) {
-            delete currentPage;
-            currentPage = nextPage;
-            nextPage = nullptr;
-        }
+        InputManager::update();
+        Client::update();
         /*Draw current Page*/
-        currentPage->draw();
+        Navigator::draw();
 
         /*FPS counter*/
         const double now = glfwGetTime();
@@ -177,12 +177,6 @@ void GraphicsManager::start() {
 
         glfwPollEvents();
     }
-}
-
-void GraphicsManager::setCurrentPage(Page *page) {
-    delete nextPage;
-    nextPage = page;
-    std::cout << "Page changed" << std::endl;
 }
 
 void GraphicsManager::cleanup() {

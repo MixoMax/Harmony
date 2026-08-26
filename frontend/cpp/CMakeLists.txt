@@ -36,21 +36,27 @@ endif ()
 
 
 add_executable(Harmony
-        #        poc/Terminal.cpp
         src/main.cpp
         src/glad.c
         src/settings.h
         src/voiceChannels/VoiceChannelManager.cpp
         src/voiceChannels/VoiceChannelManager.h
         src/voiceChannels/PulseAudioDeviceEnumeration.h
+        src/voiceChannels/transmissionTechnologies/TransmissionManager.cpp
+        src/voiceChannels/transmissionTechnologies/TransmissionManager.h
+        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.cpp
+        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.h
+        src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.cpp
+        src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.h
+        src/voiceChannels/graphics/AudioVisualizer.cpp
+        src/voiceChannels/graphics/AudioVisualizer.h
+        src/supporters/SDF.h
+        src/supporters/InputManager.cpp
+        src/supporters/InputManager.h
         src/graphics/GraphicsManager.cpp
         src/graphics/GraphicsManager.h
-        src/supporters/fileWizard.h
-        src/supporters/fileWizard.cpp
-        src/supporters/stb_image_impl.cpp
         src/graphics/basicShapes/Rectangle.cpp
         src/graphics/basicShapes/Rectangle.h
-        src/supporters/SDF.h
         src/graphics/widgets/FilledButton.cpp
         src/graphics/widgets/FilledButton.h
         src/graphics/widgets/Widget.cpp
@@ -59,35 +65,24 @@ add_executable(Harmony
         src/graphics/meshes/RectangularMesh.h
         src/graphics/meshes/MeshInitializer.h
         src/graphics/shaders/ShaderInitializer.h
-        src/supporters/InputManager.cpp
-        src/supporters/InputManager.h
-        src/supporters/interpolation.h
-        src/supporters/Alignment.h
-        src/supporters/Alignment.cpp
-        src/voiceChannels/transmissionTechnologies/TransmissionManager.cpp
-        src/voiceChannels/transmissionTechnologies/TransmissionManager.h
-        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.cpp
-        src/voiceChannels/transmissionTechnologies/websockets/WebsocketManager.h
-        src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.cpp
-        src/voiceChannels/transmissionTechnologies/udpSockets/UDPSocketManager.h
-        src/httpUtils/Client.cpp
-        src/httpUtils/Client.h
-        src/httpUtils/dataClasses/Room.cpp
-        src/httpUtils/dataClasses/Room.h
-        src/httpUtils/dataClasses/User.cpp
-        src/httpUtils/dataClasses/User.h
         src/graphics/pages/Homepage.cpp
         src/graphics/pages/Homepage.h
         src/graphics/pages/Page.cpp
         src/graphics/pages/Page.h
         src/graphics/widgets/TextButton.cpp
         src/graphics/widgets/TextButton.h
-        src/voiceChannels/graphics/AudioVisualizer.cpp
-        src/voiceChannels/graphics/AudioVisualizer.h
         src/graphics/widgets/TextField.cpp
         src/graphics/widgets/TextField.h
         src/graphics/pages/CallPage.cpp
         src/graphics/pages/CallPage.h
+        src/httpUtils/Client.cpp
+        src/httpUtils/Client.h
+        src/httpUtils/dataClasses/Room.cpp
+        src/httpUtils/dataClasses/Room.h
+        src/httpUtils/dataClasses/User.cpp
+        src/httpUtils/dataClasses/User.h
+        src/supporters/Navigator.cpp
+        src/supporters/Navigator.h
 )
 
 #include directories

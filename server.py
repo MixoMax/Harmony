@@ -29,7 +29,7 @@ class Room:
 
 
 class WebSocketManager:
-    rooms: dict[str, Room] = {}  # room_id: list of tuples (websocket, username)
+    rooms: dict[str, Room] = {}  # room_id: Room
 
     def __init__(self):
         self.rooms = {}
@@ -59,12 +59,6 @@ class WebSocketManager:
         if not room.users:  # If the room is empty, remove it
             del self.rooms[room.name]
 
-    async def broadcast_bytes(self, room: Room, data: bytes, excluded_user: User | None = None):
-        for user in room.users:
-            if user != excluded_user:
-                print(f"sending {len(data)} bytes to {user.name} in room {room.name}")
-                asyncio.create_task(user.websocket.send_bytes(data))
-
     # HTTP Requests
     def get_room_data(self):
         print(self.rooms)
@@ -85,8 +79,7 @@ async def websocket_endpoint(websocket: websockets.WebSocket, room_id: str, user
     room: Room = await wsm.connect(room_id=room_id, user=user)
     try:
         while True:
-            data = await websocket.receive_bytes()
-            await wsm.broadcast_bytes(room=room, data=data, excluded_user=user)
+            await websocket.receive_bytes()
     except websockets.WebSocketDisconnect:
         await wsm.disconnect(room=room, user=user)
 
