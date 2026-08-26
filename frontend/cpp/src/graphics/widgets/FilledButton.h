@@ -15,7 +15,7 @@
 
 
 class FilledButton : public Widget {
-    float borderRadius = 100;
+    float borderRadius = 0;
     vec2 position{};
     vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.f);
     size_t onPressedId = -1;

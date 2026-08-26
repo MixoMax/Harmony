@@ -19,8 +19,6 @@ void CallPage::reloadUsers() {
 
         TextButton &userButton = bUsers.emplace_back();
         userButton.setPosition(0, buttonY);
-        userButton.setBorderRadius(100);
-
         userButton.setText(users[userIndex].name);
     }
 }

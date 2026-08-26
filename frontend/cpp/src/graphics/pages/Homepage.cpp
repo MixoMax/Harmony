@@ -34,6 +34,7 @@ Homepage::Homepage() {
             const std::string userName = tfUserName.getText();
             if (userName.empty() || roomName.empty()) {
                 std::cerr << "> Username or room name is empty!" << std::endl;
+                GraphicsManager::setErrorMessage("Username or room name is empty!");
                 return true;
             }
 
@@ -99,11 +100,11 @@ void Homepage::reloadRooms() {
 
         TextButton &roomButton = bRooms.emplace_back();
         roomButton.setPosition(0, buttonY);
-        roomButton.setBorderRadius(100);
         roomButton.setOnPressed([&room, this](GLFWwindow *window, const int button, const int action, const int mods) {
             if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
                 if (tfUserName.getText().empty()) {
                     std::cerr << "> Username is empty!" << std::endl;
+                    GraphicsManager::setErrorMessage("Username is empty!");
                     return true;
                 }
 

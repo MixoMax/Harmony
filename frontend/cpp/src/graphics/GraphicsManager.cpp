@@ -132,6 +132,10 @@ int GraphicsManager::getScreenHeight() const {
     return screenHeight;
 }
 
+void GraphicsManager::setErrorMessage(const std::string &message) {
+    instance->errorMessage = message;
+}
+
 void GraphicsManager::start() {
     glfwShowWindow(window);
 
@@ -143,9 +147,16 @@ void GraphicsManager::start() {
     CharacterManager::initializeCharacterManager(fontQualityInPixel, fontFamilies);
 
 
-    const Font fpsFont{
-        .family = "Roboto", .size = 1, .rotation = 0, .color = {1, 1, 1, 1}, .alignment = Alignment::TopLeft
-    };
+    okButton.setPosition(0, -200);
+    okButton.setText("OK");
+    okButton.setOnPressed([this](GLFWwindow *w, int button, const int action, int mods) {
+        if (action == GLFW_PRESS) {
+            errorMessage = "";
+            return true;
+        }
+        return false;
+    });
+
 
     Navigator::push<Homepage>();
 
@@ -166,6 +177,11 @@ void GraphicsManager::start() {
         Client::update();
         /*Draw current Page*/
         Navigator::draw();
+
+        if (!errorMessage.empty()) {
+            CharacterManager::drawText(errorMessage, errorFont, 0, 0);
+            okButton.draw();
+        }
 
         /*FPS counter*/
         const double now = glfwGetTime();
